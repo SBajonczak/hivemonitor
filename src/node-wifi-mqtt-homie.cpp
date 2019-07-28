@@ -40,31 +40,33 @@
 #include "HX711.h"
 #include <RunningMedian.h>
 
-
 HX711 scale;
+#define USE_VOLTAGE_MEASUREMENT true
 
 #define FW_NAME "node-wifi-mqtt-homie"
 #define FW_VERSION "0.10.0"
+
 const int DEFAULT_SEND_INTERVAL = 60;
 
 //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
 #define ARDUINOJSON_USE_DOUBLE 0
 //function to round to two decimals
-float round2two(float tmp) {
+float round2two(float tmp)
+{
   return ((int)(tmp * 100)) / 100.00;
 }
 
 // PINs
-#define ONE_WIRE_BUS D5// 14
-#define DOUT  13
-#define PD_SCK  12
+#define ONE_WIRE_BUS D5 // 14
+#define DOUT 13
+#define PD_SCK 12
 
 /* Use sketch BeeScale-Calibration.ino to determine these calibration values.
    Set them here or use HomieSetting via config.json or WebApp/MQTT
 */
-const float DEFAULT_WEIGHT_OFFSET = 244017.00; // Load cell zero offset.
-const float DEFAULT_KILOGRAM_DIVIDER = 22.27;  // Load cell value per kilogram.
-const float DEFAULT_CALIBRATION_TEMPERATURE = 20.0; // Temperature at which the scale has been calibrated for Temperature compensation
+const float DEFAULT_WEIGHT_OFFSET = 244017.00;            // Load cell zero offset.
+const float DEFAULT_KILOGRAM_DIVIDER = 22.27;             // Load cell value per kilogram.
+const float DEFAULT_CALIBRATION_TEMPERATURE = 20.0;       // Temperature at which the scale has been calibrated for Temperature compensation
 const float DEFAULT_CALIBRATION_FACTOR_GRAM_DEGREE = 0.0; // Calibration factor in gram per degree
 unsigned long lastSent = 0;
 
@@ -78,7 +80,6 @@ float raw_voltage;
 float vcc_adjust;
 int sendInterval;
 
-
 ADC_MODE(ADC_VCC);
 
 // Setup a OneWire instance to communicate with any OneWire devices
@@ -86,55 +87,68 @@ OneWire OneWire(ONE_WIRE_BUS);
 // Pass our OneWire reference to Dallas Temperature.
 DallasTemperature sensors(&OneWire);
 
-
 HomieNode temperatureNode0("temperature0", "temperature");
 HomieNode temperatureNode1("temperature1", "temperature");
 HomieNode weightNode("weight", "weight");
-// HomieNode batteryNode("battery", "battery");
-HomieNode jsonNode("data","__json__");
+HomieNode batteryNode("battery", "battery");
+HomieNode jsonNode("data", "__json__");
 
 HomieSetting<long> sendIntervalSetting("sendInterval", "Interval for measurements in seconds (max. 3600)");
 HomieSetting<long> weightOffsetSetting("weightOffset", "Offset value to zero. Use BeeScale-Calibration.ino to determine.");
 HomieSetting<double> kilogramDividerSetting("kilogramDivider", "Scale value per kilogram. Use BeeScale-Calibration.ino to determine.");
 HomieSetting<double> calibrationTemperatureSetting("calibrationTemperature", "Outside Temperature at which the scale has been calibrated");
 HomieSetting<double> calibrationFactorSetting("calibrationFactor", "Calibration Factor in gram per degree. 0.0 to disable adjustment");
-//HomieSetting<double> vccAdjustSetting("vccAdjust", "Calibration value for input voltage. See sketch for details.");
+HomieSetting<double> vccAdjustSetting("vccAdjust", "Calibration value for input voltage. See sketch for details.");
 
-void setupHandler() {
-    Homie.getLogger() << endl << endl <<"Setup Start";
+void setupHandler()
+{
+  Homie.getLogger() << endl
+                    << endl
+                    << "Setup Start";
 
   temperatureNode0.setProperty("unit").send("C");
   temperatureNode1.setProperty("unit").send("C");
   weightNode.setProperty("unit").send("kg");
-  // batteryNode.setProperty("unit").send("V");
-    Homie.getLogger() << endl << endl <<"Setup End";
+  if (USE_VOLTAGE_MEASUREMENT)
+  {
+    batteryNode.setProperty("unit").send("V");
+  }
+  Homie.getLogger() << endl
+                    << endl
+                    << "Setup End";
 }
 
-void getTemperatures() {
+void getTemperatures()
+{
   sensors.begin();
   // call sensors.requestTemperatures() to issue a global temperature
   // request to all devices on the bus
   sensors.requestTemperatures(); // Send the command to get temperatures
   delay(100);
   temperature0 = sensors.getTempCByIndex(0);
-  if (temperature0 == -127) {                  //ignore wrong reading
+  if (temperature0 == -127)
+  { //ignore wrong reading
     delay(100);
-  temperature0 = sensors.getTempCByIndex(0);
+    temperature0 = sensors.getTempCByIndex(0);
   }
   temperature1 = sensors.getTempCByIndex(1);
-  if (temperature1 == -127) {                  //ignore wrong reading
+  if (temperature1 == -127)
+  { //ignore wrong reading
     delay(100);
   }
   temperature1 = sensors.getTempCByIndex(1);
 }
 
-void getWeight() {
-  scale.set_scale(kilogramDividerSetting.get());  //initialize scale
-  scale.set_offset(weightOffsetSetting.get());    //initialize scale
-  Homie.getLogger() << endl << endl;
+void getWeight()
+{
+  scale.set_scale(kilogramDividerSetting.get()); //initialize scale
+  scale.set_offset(weightOffsetSetting.get());   //initialize scale
+  Homie.getLogger() << endl
+                    << endl;
   Homie.getLogger() << "Reading scale, hold on" << endl;
   scale.power_up();
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++)
+  {
     float WeightRaw = scale.get_units(3);
     yield();
     Homie.getLogger() << "✔ Raw measurements: " << WeightRaw << "g" << endl;
@@ -150,23 +164,28 @@ void getWeight() {
   Homie.getLogger() << "✔ uncompensated median Weight: " << weight << "g" << endl;
   float calibrationTemperature = calibrationTemperatureSetting.get();
   float calibrationFactor = calibrationFactorSetting.get();
-  if (temperature1 < calibrationTemperature) weight = weight+(fabs(temperature1 - calibrationTemperature)*calibrationFactor);
-  if (temperature1 > calibrationTemperature) weight = weight-(fabs(temperature1 - calibrationTemperature)*calibrationFactor);
+  if (temperature1 < calibrationTemperature)
+    weight = weight + (fabs(temperature1 - calibrationTemperature) * calibrationFactor);
+  if (temperature1 > calibrationTemperature)
+    weight = weight - (fabs(temperature1 - calibrationTemperature) * calibrationFactor);
   Homie.getLogger() << "✔ compensated median Weight: " << weight << "g" << endl;
 
-  weight = weight / 1000 ;      // we want kilogram
+  weight = weight / 1000; // we want kilogram
 }
 
-// void getVolt() {
-//     raw_voltage = ESP.getVcc();
-//     vcc_adjust = vccAdjustSetting.get();
-//     Homie.getLogger() << "Voltage adjust value is: " << vcc_adjust << "V" << endl;
-//     voltage = raw_voltage / 1000 + vcc_adjust;
-// }
+void getVolt()
+{
+  raw_voltage = ESP.getVcc();
+  vcc_adjust = vccAdjustSetting.get();
+  Homie.getLogger() << "Voltage adjust value is: " << vcc_adjust << "V" << endl;
+  voltage = raw_voltage / 1000 + vcc_adjust;
+}
 
-void loopHandler() {
+void loopHandler()
+{
 
-   if (millis() - lastSent >= sendIntervalSetting.get() * 1000UL || lastSent == 0) {
+  if (millis() - lastSent >= sendIntervalSetting.get() * 1000UL || lastSent == 0)
+  {
     getTemperatures();
     Homie.getLogger() << "Temperature0: " << temperature0 << " °C" << endl;
     temperatureNode0.setProperty("degrees").setRetained(false).send(String(temperature0));
@@ -174,17 +193,18 @@ void loopHandler() {
     Homie.getLogger() << "Temperature1: " << temperature1 << " °C" << endl;
     temperatureNode1.setProperty("degrees").setRetained(false).send(String(temperature1));
 
-//    getWeight();
+    //    getWeight();
     Homie.getLogger() << "Weight: " << weight << " kg" << endl;
     weightNode.setProperty("kilogram").setRetained(false).send(String(weight));
-
-    // getVolt();
-    // Homie.getLogger() << "Raw Input Voltage: " << raw_voltage << " V" << endl;
-    // Homie.getLogger() << "Input Voltage: " << voltage << " V" << endl;
-    // batteryNode.setProperty("volt").setRetained(true).send(String(voltage));
-
+    if (USE_VOLTAGE_MEASUREMENT)
+    {
+      getVolt();
+      Homie.getLogger() << "Raw Input Voltage: " << raw_voltage << " V" << endl;
+      Homie.getLogger() << "Input Voltage: " << voltage << " V" << endl;
+      batteryNode.setProperty("volt").setRetained(true).send(String(voltage));
+    }
     StaticJsonBuffer<200> jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
+    JsonObject &root = jsonBuffer.createObject();
     root["Weight"] = round2two(weight);
     root["Temp1"] = round2two(temperature0);
     root["Temp2"] = round2two(temperature1);
@@ -196,9 +216,10 @@ void loopHandler() {
     //Homie.getLogger() << "Heap size: " << ESP.getFreeHeap() << " bytes, ";
 
     lastSent = millis();
-   }
+  }
 }
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   Homie_setFirmware(FW_NAME, FW_VERSION);
   Homie.setSetupFunction(setupHandler).setLoopFunction(loopHandler);
@@ -224,15 +245,17 @@ void setup() {
 
   weightNode.advertise("unit");
   weightNode.advertise("kilogram");
+  if (USE_VOLTAGE_MEASUREMENT)
+  {
+    batteryNode.advertise("unit");
+    batteryNode.advertise("volt");
+  }
+  Homie.getLogger() << "Setup homie";
 
-  // batteryNode.advertise("unit");
-  // batteryNode.advertise("volt");
-   Homie.getLogger() <<  "Setup homie";
-
-   Homie.setup();
+  Homie.setup();
 }
 
-
-void loop() {
+void loop()
+{
   Homie.loop();
 }
