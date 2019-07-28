@@ -1,0 +1,6 @@
+{
+    "port": "COM5",
+    "board": "esp32:esp32:nodemcu-32s",
+    "configuration": "FlashFreq=80,UploadSpeed=921600",
+    "sketch": "node-wifi-mqtt-homie.ino"
+}
