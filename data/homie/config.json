@@ -1,0 +1,23 @@
+{
+    "wifi": {
+        "ssid": "Ponyhof",
+        "password": "Tumalonga2411"
+    },
+    "mqtt": {
+        "host": "mediacenter",
+        "port": 1886,
+        "auth": true,
+        "username": "sascha",
+        "password": "tumalonga2411"
+    },
+    "name": "hive-teststand",
+    "ota": {
+        "enabled": false
+    },
+    "device_id": "hive-teststand",
+    "settings": {
+        "sendInterval": 60,
+        "weightOffset": 244017.00,
+        "kilogramDivider": 22.27
+    }
+}

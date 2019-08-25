@@ -64,8 +64,8 @@ float round2two(float tmp)
 /* Use sketch BeeScale-Calibration.ino to determine these calibration values.
    Set them here or use HomieSetting via config.json or WebApp/MQTT
 */
-const float DEFAULT_WEIGHT_OFFSET = 244017.00;            // Load cell zero offset.
-const float DEFAULT_KILOGRAM_DIVIDER = 22.27;             // Load cell value per kilogram.
+const float DEFAULT_WEIGHT_OFFSET = 33840.00;             // Load cell zero offset.
+const float DEFAULT_KILOGRAM_DIVIDER = 20.85;             // Load cell value per kilogram.
 const float DEFAULT_CALIBRATION_TEMPERATURE = 20.0;       // Temperature at which the scale has been calibrated for Temperature compensation
 const float DEFAULT_CALIBRATION_FACTOR_GRAM_DEGREE = 0.0; // Calibration factor in gram per degree
 unsigned long lastSent = 0;
@@ -75,6 +75,8 @@ RunningMedian WeightSamples = RunningMedian(4);
 float weight;
 float temperature0;
 float temperature1;
+float temperature2;
+float temperature3;
 float voltage;
 float raw_voltage;
 float vcc_adjust;
@@ -89,6 +91,8 @@ DallasTemperature sensors(&OneWire);
 
 HomieNode temperatureNode0("temperature0", "temperature");
 HomieNode temperatureNode1("temperature1", "temperature");
+HomieNode temperatureNode2("temperature2", "temperature");
+HomieNode temperatureNode3("temperature3", "temperature");
 HomieNode weightNode("weight", "weight");
 HomieNode batteryNode("battery", "battery");
 HomieNode jsonNode("data", "__json__");
@@ -98,7 +102,7 @@ HomieSetting<long> weightOffsetSetting("weightOffset", "Offset value to zero. Us
 HomieSetting<double> kilogramDividerSetting("kilogramDivider", "Scale value per kilogram. Use BeeScale-Calibration.ino to determine.");
 HomieSetting<double> calibrationTemperatureSetting("calibrationTemperature", "Outside Temperature at which the scale has been calibrated");
 HomieSetting<double> calibrationFactorSetting("calibrationFactor", "Calibration Factor in gram per degree. 0.0 to disable adjustment");
-HomieSetting<double> vccAdjustSetting("vccAdjust", "Calibration value for input voltage. See sketch for details.");
+// HomieSetting<double> vccAdjustSetting("test", "Calibration value for input voltage. See sketch for details.");
 
 void setupHandler()
 {
@@ -108,6 +112,8 @@ void setupHandler()
 
   temperatureNode0.setProperty("unit").send("C");
   temperatureNode1.setProperty("unit").send("C");
+  temperatureNode2.setProperty("unit").send("C");
+  temperatureNode3.setProperty("unit").send("C");
   weightNode.setProperty("unit").send("kg");
   if (USE_VOLTAGE_MEASUREMENT)
   {
@@ -118,6 +124,17 @@ void setupHandler()
                     << "Setup End";
 }
 
+float getTemperatureByIndex(int index)
+{
+  float temp;
+  temp = sensors.getTempCByIndex(index);
+  if (temp == -127)
+  { //ignore wrong reading
+    delay(100);
+    temp = sensors.getTempCByIndex(index);
+  }
+  return temp;
+}
 void getTemperatures()
 {
   sensors.begin();
@@ -125,18 +142,10 @@ void getTemperatures()
   // request to all devices on the bus
   sensors.requestTemperatures(); // Send the command to get temperatures
   delay(100);
-  temperature0 = sensors.getTempCByIndex(0);
-  if (temperature0 == -127)
-  { //ignore wrong reading
-    delay(100);
-    temperature0 = sensors.getTempCByIndex(0);
-  }
-  temperature1 = sensors.getTempCByIndex(1);
-  if (temperature1 == -127)
-  { //ignore wrong reading
-    delay(100);
-  }
-  temperature1 = sensors.getTempCByIndex(1);
+  temperature0 = getTemperatureByIndex(0);
+  temperature1 = getTemperatureByIndex(1);
+  temperature2 = getTemperatureByIndex(2);
+  temperature3 = getTemperatureByIndex(2);
 }
 
 void getWeight()
@@ -176,7 +185,7 @@ void getWeight()
 void getVolt()
 {
   raw_voltage = ESP.getVcc();
-  vcc_adjust = vccAdjustSetting.get();
+  // vcc_adjust = vccAdjustSetting.get();
   Homie.getLogger() << "Voltage adjust value is: " << vcc_adjust << "V" << endl;
   voltage = raw_voltage / 1000 + vcc_adjust;
 }
@@ -193,7 +202,13 @@ void loopHandler()
     Homie.getLogger() << "Temperature1: " << temperature1 << " °C" << endl;
     temperatureNode1.setProperty("degrees").setRetained(false).send(String(temperature1));
 
-    //    getWeight();
+    Homie.getLogger() << "Temperature2: " << temperature2 << " °C" << endl;
+    temperatureNode2.setProperty("degrees").setRetained(false).send(String(temperature2));
+
+    Homie.getLogger() << "Temperature3: " << temperature3 << " °C" << endl;
+    temperatureNode3.setProperty("degrees").setRetained(false).send(String(temperature3));
+
+    getWeight();
     Homie.getLogger() << "Weight: " << weight << " kg" << endl;
     weightNode.setProperty("kilogram").setRetained(false).send(String(weight));
     if (USE_VOLTAGE_MEASUREMENT)
@@ -208,6 +223,8 @@ void loopHandler()
     root["Weight"] = round2two(weight);
     root["Temp1"] = round2two(temperature0);
     root["Temp2"] = round2two(temperature1);
+    root["Temp3"] = round2two(temperature2);
+    root["Temp4"] = round2two(temperature3);
     String values;
     root.printTo(values);
     Homie.getLogger() << "Json data:" << values << endl;
@@ -220,10 +237,13 @@ void loopHandler()
 }
 void setup()
 {
+  Homie.getLogger() << "Start:" << endl;
+
   Serial.begin(115200);
+  //Homie.setHomieBootModeOnNextBoot(HomieBootMode::CONFIGURATION);
   Homie_setFirmware(FW_NAME, FW_VERSION);
   Homie.setSetupFunction(setupHandler).setLoopFunction(loopHandler);
-  Homie.disableLedFeedback(); // LED pin would break serial on ESP-07
+  // Homie.disableLedFeedback(); // LED pin would break serial on ESP-07
 
   sendIntervalSetting.setDefaultValue(DEFAULT_SEND_INTERVAL);
   /*
@@ -234,14 +254,20 @@ void setup()
   kilogramDividerSetting.setDefaultValue(DEFAULT_KILOGRAM_DIVIDER);
   calibrationTemperatureSetting.setDefaultValue(DEFAULT_CALIBRATION_TEMPERATURE);
   calibrationFactorSetting.setDefaultValue(DEFAULT_CALIBRATION_FACTOR_GRAM_DEGREE);
-
-  //  scale.begin(DOUT, PD_SCK);
+  Homie.getLogger() << "Init scale:" << endl;
+  scale.begin(DOUT, PD_SCK);
 
   temperatureNode0.advertise("unit");
   temperatureNode0.advertise("degrees");
 
   temperatureNode1.advertise("unit");
   temperatureNode1.advertise("degrees");
+
+  temperatureNode2.advertise("unit");
+  temperatureNode2.advertise("degrees");
+
+  temperatureNode3.advertise("unit");
+  temperatureNode3.advertise("degrees");
 
   weightNode.advertise("unit");
   weightNode.advertise("kilogram");
@@ -253,6 +279,7 @@ void setup()
   Homie.getLogger() << "Setup homie";
 
   Homie.setup();
+  Homie.getLogger() << "End Start:" << endl;
 }
 
 void loop()
