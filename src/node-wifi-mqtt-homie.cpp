@@ -342,6 +342,10 @@ void onHomieEvent(const HomieEvent &event)
     delay(100);
     yield;
     Homie.getLogger() << "Sleeping now!" << endl;
+    delay(100);
+    delay(100);
+    delay(100);
+    delay(100);
     break;
   }
 }
