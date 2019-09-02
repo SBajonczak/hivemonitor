@@ -4,7 +4,7 @@
         "password": "Tumalonga2411"
     },
     "mqtt": {
-        "host": "mediacenter",
+        "host": "192.168.178.201",
         "port": 1886,
         "auth": true,
         "username": "sascha",
@@ -16,7 +16,7 @@
     },
     "device_id": "hive-teststand",
     "settings": {
-        "sleepTime": 60,
+        "sleepTime": 10,
         "sendInterval": 60,
         "weightOffset": 244017,
         "kilogramDivider": 22.27

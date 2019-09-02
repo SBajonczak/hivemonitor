@@ -333,11 +333,15 @@ void onHomieEvent(const HomieEvent &event)
 
   case HomieEventType::READY_TO_SLEEP:
     Homie.getLogger() << "DEBUG: Total runtime: " << millis() / 1000 << endl;
+    delay(100);
     buf[0] = STATE_SLEEP_WAKE;
+    delay(100);
     system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
+    delay(100);
     ESP.deepSleep(SLEEP_TIME * 1000000, WAKE_RF_DISABLED);
     delay(100);
     yield;
+    Homie.getLogger() << "Sleeping now!" << endl;
     break;
   }
 }
