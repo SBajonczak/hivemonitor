@@ -18,7 +18,7 @@
     "settings": {
         "sleepTime": 60,
         "sendInterval": 60,
-        "weightOffset": 244017.00,
+        "weightOffset": 244017,
         "kilogramDivider": 22.27
     }
 }
