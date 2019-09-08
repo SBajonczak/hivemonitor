@@ -325,6 +325,7 @@ void onHomieEvent(const HomieEvent &event)
   case HomieEventType::MQTT_READY:
     //debug MTU?
     delay(100);
+
     transmit();
     Homie.getLogger() << "DEBUG: After transmit(): " << millis() / 1000 << endl;
     Homie.getLogger() << "✔ Data is transmitted, waiting for package acks..." << endl;
@@ -332,20 +333,12 @@ void onHomieEvent(const HomieEvent &event)
     break;
 
   case HomieEventType::READY_TO_SLEEP:
+
     Homie.getLogger() << "DEBUG: Total runtime: " << millis() / 1000 << endl;
-    delay(100);
     buf[0] = STATE_SLEEP_WAKE;
-    delay(100);
     system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-    delay(100);
     ESP.deepSleep(SLEEP_TIME * 1000000, WAKE_RF_DISABLED);
-    delay(100);
-    yield;
     Homie.getLogger() << "Sleeping now!" << endl;
-    delay(100);
-    delay(100);
-    delay(100);
-    delay(100);
     break;
   }
 }
@@ -356,12 +349,10 @@ void loopHandler()
 
 void setup()
 {
-
   WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
   yield();
   system_rtc_mem_read(RTC_BASE, buf, 2); // read 2 bytes from RTC-MEMORY to get our state
   yield();
-
   Serial.begin(115200);
   Homie.getLogger() << endl
                     << endl;
@@ -391,36 +382,26 @@ void setup()
     // prepare to activate wifi
     buf[0] = STATE_CONNECT_WIFI; // one more sleep required to to wake with wifi on
     WiFi.forceSleepWake();
-    yield();
     WiFi.mode(WIFI_STA);
-    yield();
     system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-    yield();
     ESP.deepSleep(10, WAKE_RFCAL);
-    yield();
     break;
 
   case STATE_SLEEP_WAKE:
     // prepare to activate wifi
+
     buf[0] = STATE_CONNECT_WIFI; // one more sleep required to to wake with wifi on
     WiFi.forceSleepWake();
-    yield();
     WiFi.mode(WIFI_STA);
-    yield();
     system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-    yield();
     ESP.deepSleep(10, WAKE_RFCAL);
-    yield();
+
     break;
 
   case STATE_CONNECT_WIFI:
     Homie.disableLedFeedback(); // collides with Serial on ESP07
-    yield();
     Homie.onEvent(onHomieEvent);
-    yield();
-
     sleepTimeSetting.setDefaultValue(DEFAULT_SLEEP_TIME);
-    yield();
     /*
      * Can't set more than one value to default, see issue #323
      * https://github.com/marvinroger/homie-esp8266/issues/323
@@ -433,19 +414,12 @@ void setup()
 
     Homie.getLogger() << "DEBUG: Turn on WIFI: " << millis() / 1000 << endl;
     WiFi.forceSleepWake();
-    yield();
     delay(500);
     wifi_set_sleep_type(MODEM_SLEEP_T);
-    yield();
-
     Homie_setFirmware(FW_NAME, FW_VERSION);
-    yield();
     Homie.setSetupFunction(setupHandler).setLoopFunction(loopHandler);
-    yield();
-
     weightNode.advertise("unit");
     weightNode.advertise("kilogram");
-
     temperatureNode0.advertise("unit");
     temperatureNode0.advertise("degrees");
 
