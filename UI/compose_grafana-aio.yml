@@ -1,0 +1,18 @@
+services:
+  grafana:
+    image: philhawthorne/docker-influxdb-grafana:latest
+    container_name: grafana-aio
+    restart: always
+    ports:
+      - "3000:3000"
+      - "3004:8888"
+      - "8086:8086"
+    volumes:
+      # Data persistency
+      # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
+        - ${WEBAPP_STORAGE_HOME}/data/grafana:/var/lib/influxdb
+        - ${WEBAPP_STORAGE_HOME}/data/grafana:/var/lib/grafana
+
+
+
+docker run -d --name docker-influxdb-grafana -p 3003:3003 -p 3004:8888 -p 8086:8086 philhawthorne/docker-influxdb-grafana:latest

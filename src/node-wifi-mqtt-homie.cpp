@@ -154,12 +154,12 @@ float raw_voltage;
 float vcc_adjust;
 int SLEEP_TIME;
 
-HomieNode weightNode("weight", "weight");
-HomieNode temperatureNode0("temperature0", "temperature");
-HomieNode temperatureNode1("temperature1", "temperature");
-HomieNode batteryNode("battery", "volt");
-HomieNode batAlarmNode("battery", "alarm");
-HomieNode jsonNode("data", "__json__"); //Hiveeyes.org compatibility format
+HomieNode weightNode("weight", "weight", "double");
+HomieNode temperatureNode0("temperature0", "temperature", "double");
+HomieNode temperatureNode1("temperature1", "temperature", "double");
+HomieNode batteryNode("battery", "volt", "double");
+HomieNode batAlarmNode("battery", "alarm", "boolean");
+HomieNode jsonNode("data", "__json__", "array"); //Hiveeyes.org compatibility format
 
 void setupHandler()
 {
@@ -313,13 +313,16 @@ void onHomieEvent(const HomieEvent &event)
   case HomieEventType::NORMAL_MODE:
 
     timeout.attach(1.0, max_run);
-
     getTemperatures();
 #if USE_SCALE
     getWeight();
 #endif
     getVolt();
     Homie.getLogger() << "DEBUG: After measurements: " << millis() / 1000 << endl;
+    break;
+
+  case HomieEventType::WIFI_DISCONNECTED:
+    Homie.getLogger() << "Wifi disconnected" << endl;
     break;
 
   case HomieEventType::MQTT_READY:
@@ -329,6 +332,8 @@ void onHomieEvent(const HomieEvent &event)
     transmit();
     Homie.getLogger() << "DEBUG: After transmit(): " << millis() / 1000 << endl;
     Homie.getLogger() << "✔ Data is transmitted, waiting for package acks..." << endl;
+    //max_run();
+    delay(100);
     Homie.prepareToSleep();
     break;
 
@@ -337,7 +342,7 @@ void onHomieEvent(const HomieEvent &event)
     Homie.getLogger() << "DEBUG: Total runtime: " << millis() / 1000 << endl;
     buf[0] = STATE_SLEEP_WAKE;
     system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-    ESP.deepSleep(SLEEP_TIME * 1000000, WAKE_RF_DISABLED);
+    ESP.deepSleep(SLEEP_TIME * 1000000);
     Homie.getLogger() << "Sleeping now!" << endl;
     break;
   }
@@ -347,59 +352,64 @@ void loopHandler()
 {
 }
 
+const int sleepSeconds = 5;
+
 void setup()
 {
-  WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
-  yield();
-  system_rtc_mem_read(RTC_BASE, buf, 2); // read 2 bytes from RTC-MEMORY to get our state
-  yield();
-  Serial.begin(115200);
-  Homie.getLogger() << endl
-                    << endl;
+  Homie.disableResetTrigger();
+  Homie.disableLedFeedback(); // collides with Serial on ESP07
 
-  yield();
+  WiFi.forceSleepBegin();                // send wifi directly to sleep to reduce power consumption
+  system_rtc_mem_read(RTC_BASE, buf, 2); // read 2 bytes from RTC-MEMORY to get our state
+  Serial.begin(115200);
+  Homie.getLogger() << endl;
+  //                   << endl;
+
   if ((buf[0] != 0x55) || (buf[1] != 0xaa)) // cold start, magic number is not present in rtc
   {
     state = STATE_COLDSTART;
     buf[0] = 0x55;
     buf[1] = 0xaa;                          //set and write the magic number
     system_rtc_mem_write(RTC_BASE, buf, 2); //set and write the magic number
-    yield();
   }
   else // reset was due to sleep-wake cycle
   {
     system_rtc_mem_read(RTC_STATE, buf, 1);
-    yield();
     state = buf[0];
   }
 
-  // now the restart cause is clear, handle the different states
+  // // now the restart cause is clear, handle the different states
   Serial.printf("State: %d\r\n", state);
+  Serial.printf("State STATE_COLDSTART : %d\r\n", STATE_COLDSTART);
+  Serial.printf("State STATE_SLEEP_WAKE: %d\r\n", STATE_SLEEP_WAKE);
+  Serial.printf("State STATE_CONNECT_WIFI: %d\r\n", STATE_CONNECT_WIFI);
 
   switch (state)
   {
+  case STATE_SLEEP_WAKE:
   case STATE_COLDSTART: // first run after power on - initializes
     // prepare to activate wifi
     buf[0] = STATE_CONNECT_WIFI; // one more sleep required to to wake with wifi on
     WiFi.forceSleepWake();
     WiFi.mode(WIFI_STA);
     system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-    ESP.deepSleep(10, WAKE_RFCAL);
-    break;
 
-  case STATE_SLEEP_WAKE:
-    // prepare to activate wifi
-
-    buf[0] = STATE_CONNECT_WIFI; // one more sleep required to to wake with wifi on
-    WiFi.forceSleepWake();
-    WiFi.mode(WIFI_STA);
-    system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-    ESP.deepSleep(10, WAKE_RFCAL);
+    ESP.deepSleep(sleepSeconds * 1000000, WAKE_RFCAL);
 
     break;
+
+    // case STATE_SLEEP_WAKE:
+    //   // prepare to activate wifi
+
+    //   buf[0] = STATE_CONNECT_WIFI; // one more sleep required to to wake with wifi on
+    //   WiFi.forceSleepWake();
+    //   WiFi.mode(WIFI_STA);
+    //   system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
+    //   ESP.deepSleep(10, WAKE_RFCAL);
+
+    //   break;
 
   case STATE_CONNECT_WIFI:
-    Homie.disableLedFeedback(); // collides with Serial on ESP07
     Homie.onEvent(onHomieEvent);
     sleepTimeSetting.setDefaultValue(DEFAULT_SLEEP_TIME);
     /*
@@ -432,9 +442,13 @@ void setup()
     Homie.getLogger() << "DEBUG: Before setup(): " << millis() / 1000 << endl;
 
     Homie.setup();
-    yield();
     break;
   }
+
+  Serial.println("\n\nWake up");
+  // Serial.printf("Sleep for %d seconds\n\n", sleepSeconds);
+
+  // ESP.deepSleep(sleepSeconds * 1000000);
 }
 
 void loop()

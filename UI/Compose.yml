@@ -12,7 +12,7 @@ services:
     volumes:
       # Data persistency
       # sudo mkdir -p /srv/docker/influxdb/data
-      - ${WEBAPP_STORAGE_HOME}/data/influxdb:/var/lib/influxdb
+      # - ${WEBAPP_STORAGE_HOME}/data/influxdb:/var/lib/influxdb
 
   telegraf:
     image: telegraf:latest
@@ -35,8 +35,4 @@ services:
     volumes:
       # Data persistency
       # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
-      - ${WEBAPP_STORAGE_HOME}/data/grafana:/var/lib/grafana
-volumes:
-  grafana:
-  telegraf:
-  influxdb:
+      # - ${WEBAPP_STORAGE_HOME}/data/grafana:/var/lib/grafana
