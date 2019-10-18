@@ -16,7 +16,7 @@
     },
     "device_id": "hive-teststand",
     "settings": {
-        "sleepTime": 60,
+        "sleepTime": 320,
         "sendInterval": 60,
         "weightOffset": 244017,
         "kilogramDivider": 22.27
