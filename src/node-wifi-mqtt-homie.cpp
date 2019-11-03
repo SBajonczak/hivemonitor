@@ -54,11 +54,11 @@
 
 #define FW_NAME "node-wifi-mqtt-homie-battery"
 #define FW_VERSION "0.10.0"
-const int DEFAULT_SLEEP_TIME = 10;
+const int DEFAULT_SLEEP_TIME = 20;
 #define USE_SCALE false
 
 //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
-#define ARDUINOJSON_USE_DOUBLE 0
+#define ARDUI   NOJSON_USE_DOUBLE 0
 //function to round to two decimals
 float round2two(float tmp)
 {
@@ -66,10 +66,10 @@ float round2two(float tmp)
 }
 
 // PINs
-#define ONE_WIRE_BUS 14
-#define DOUT 13
-#define PD_SCK 12
-
+#define ONE_WIRE_BUS 14   // D5
+#define DOUT 13           // D7
+#define PD_SCK 12         // D6
+#define TANSISTORSWITCH 4 // D2
 /* Use sketch BeeScale-Calibration.ino to determine these calibration values.
    Set them here or use HomieSetting via config.json or WebApp/MQTT
 */
@@ -178,6 +178,8 @@ DallasTemperature sensors(&OneWire);
 
 void getTemperatures()
 {
+  digitalWrite(TANSISTORSWITCH,HIGH);
+
   sensors.begin();
   // call sensors.requestTemperatures() to issue a global temperature
   // request to all devices on the bus
@@ -195,10 +197,12 @@ void getTemperatures()
     delay(100);
   }
   temperature1 = sensors.getTempCByIndex(1);
+digitalWrite(TANSISTORSWITCH,LOW);
 }
 
 void getWeight()
 {
+  digitalWrite(TANSISTORSWITCH,HIGH);
   scale.begin(DOUT, PD_SCK);
   scale.set_scale(kilogramDividerSetting.get()); //initialize scale
   Homie.getLogger() << "DEBUG: Got kilogramDivider" << kilogramDividerSetting.get() << endl;
@@ -206,7 +210,7 @@ void getWeight()
   Homie.getLogger() << "DEBUG: Got weightOffset: " << weightOffsetSetting.get() << endl;
   Homie.getLogger() << endl
                     << endl;
-  Homie.getLogger() << "Reading scale, hold on" << endl;
+  Homie.getLogger() << "Re  ading scale, hold on" << endl;
   for (int i = 0; i < 3; i++)
   {
     scale.power_up();
@@ -218,6 +222,7 @@ void getWeight()
     delay(500);
     yield();
   }
+  digitalWrite(TANSISTORSWITCH,LOW);
 
   weight = WeightSamples.getMedian();
 
@@ -232,6 +237,7 @@ void getWeight()
   Homie.getLogger() << "✔ compensated median Weight: " << weight << "g" << endl;
 
   weight = weight / 1000; // we want kilogram
+
 }
 
 void getVolt()
@@ -258,11 +264,10 @@ void transmit()
   Homie.getLogger() << "Raw Input Voltage: " << raw_voltage / 1000 << " V" << endl;
   Homie.getLogger() << "Corrected Input Voltage: " << voltage << " V" << endl;
   batteryNode.setProperty("volt").setRetained(true).send(String(voltage));
-
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject &root = jsonBuffer.createObject();
   root["Weight"] = round2two(weight);
-  root["Temp1"] = round2two(temperature0);
+  root["Temp1"] = round2two(temperature0);    
   root["Temp2"] = round2two(temperature1);
   root["VCC"] = round2two(voltage);
   String values;
