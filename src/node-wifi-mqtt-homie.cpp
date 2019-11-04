@@ -52,10 +52,10 @@
 #include <RunningMedian.h>
 #include <Ticker.h>
 
-#define FW_NAME "node-wifi-mqtt-homie-battery"
+#define FW_NAME "node-wifi-mqtt-homie-battery";
 #define FW_VERSION "0.10.0"
 const int DEFAULT_SLEEP_TIME = 20;
-#define USE_SCALE false
+#define USE_SCALE true
 
 //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
 #define ARDUI   NOJSON_USE_DOUBLE 0
@@ -154,12 +154,12 @@ float raw_voltage;
 float vcc_adjust;
 int SLEEP_TIME;
 
-HomieNode weightNode("weight", "weight", "double");
-HomieNode temperatureNode0("temperature0", "temperature", "double");
-HomieNode temperatureNode1("temperature1", "temperature", "double");
-HomieNode batteryNode("battery", "volt", "double");
-HomieNode batAlarmNode("battery", "alarm", "boolean");
-HomieNode jsonNode("data", "__json__", "array"); //Hiveeyes.org compatibility format
+HomieNode weightNode("weight", "weight");
+HomieNode temperatureNode0("temperature0", "temperature");
+HomieNode temperatureNode1("temperature1", "temperature");
+HomieNode batteryNode("battery", "volt");
+HomieNode batAlarmNode("battery", "alarm");
+HomieNode jsonNode("data", "__json__"); //Hiveeyes.org compatibility format
 
 void setupHandler()
 {
