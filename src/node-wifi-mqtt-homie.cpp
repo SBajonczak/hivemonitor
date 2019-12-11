@@ -1,25 +1,4 @@
   /***********************************************************************************************************
-     ESP8266 Beescale
-    (c)2014 - 2017 Alexander Wilms
-    https://www.imker-nettetal.de
-
-    GNU GPL v3 License
-    ------------------
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, see:
-    <http://www.gnu.org/licenses/gpl-3.0.txt>,
-    or write to the Free Software Foundation,
-    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-    -------------------------------------------------------------------------
-
 
     Credits: Marvin Roger for the awesome Homie Framework: https://github.com/marvinroger/homie-esp8266
 
@@ -32,18 +11,6 @@
     async-mqtt-client:  https://github.com/marvinroger/async-mqtt-client
 
   **********************************************************************************************************/
-
-  /*
-  * Some notes to increase battery runtime:
-  * You should remove and short out the input polarity protection diode
-  * if you are using this sketch with the PCB/Design from
-  * https://www.imker-nettetal.de/bienen-nsa/ESP8266-BeeScale1_1.fzz
-  * to avoid unnecessary voltage drop. But don't mix polarity!
-  *
-  * Also you should remove any unnecessary power indicator LED to save
-  * a couple om mA. (e.g. on ESP-07 the red power indicator LED)
-  */
-
   #include <Homie.h>
   #include <OneWire.h>
   #include <DallasTemperature.h>
@@ -58,7 +25,7 @@
   #define USE_SCALE true
 
   //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
-  #define ARDUI   NOJSON_USE_DOUBLE 0
+  #define ARDUINOJSON_USE_DOUBLE 0
   //function to round to two decimals
   float round2two(float tmp)
   {
@@ -70,7 +37,9 @@
   #define DOUT 13           // D7
   #define PD_SCK 12         // D6
   #define TANSISTORSWITCH 4 // D2
-  /* Use sketch BeeScale-Calibration.ino to determine these calibration values.
+
+  /* 
+    Use sketch BeeScale-Calibration.ino to determine these calibration values.
     Set them here or use HomieSetting via config.json or WebApp/MQTT
   */
   const long DEFAULT_WEIGHT_OFFSET = 666;                   // Load cell zero offset.
@@ -93,8 +62,8 @@
   const float DEFAULT_VCC_ADJUST = -0.21;
 
   HomieSetting<long> sleepTimeSetting("sleepTime", "SleepTime in seconds (max. 3600s!), default is 60s");
-  HomieSetting<long> weightOffsetSetting("weightOffset", "Offset value to zero. Use BeeScale-Calibration.ino to determine.");
-  HomieSetting<double> kilogramDividerSetting("kilogramDivider", "Scale value per kilogram. Use BeeScale-Calibration.ino to determine.");
+  HomieSetting<long> weightOffsetSetting("weightOffset", "Offset value to zero.");
+  HomieSetting<double> kilogramDividerSetting("kilogramDivider", "Scale value per kilogram.");
   HomieSetting<double> calibrationTemperatureSetting("calibrationTemperature", "Outside Temperature at which the scale has been calibrated");
   HomieSetting<double> calibrationFactorSetting("calibrationFactor", "Calibration Factor in gram per degree. 0.0 to disable adjustment");
   HomieSetting<double> vccAdjustSetting("vccAdjust", "Calibration value for input voltage. See sketch for details.");
@@ -402,18 +371,6 @@
       ESP.deepSleep(sleepSeconds * 1000000, WAKE_RFCAL);
 
       break;
-
-      // case STATE_SLEEP_WAKE:
-      //   // prepare to activate wifi
-
-      //   buf[0] = STATE_CONNECT_WIFI; // one more sleep required to to wake with wifi on
-      //   WiFi.forceSleepWake();
-      //   WiFi.mode(WIFI_STA);
-      //   system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
-      //   ESP.deepSleep(10, WAKE_RFCAL);
-
-      //   break;
-
     case STATE_CONNECT_WIFI:
       Homie.onEvent(onHomieEvent);
       sleepTimeSetting.setDefaultValue(DEFAULT_SLEEP_TIME);
@@ -451,9 +408,6 @@
     }
 
     Serial.println("\n\nWake up");
-    // Serial.printf("Sleep for %d seconds\n\n", sleepSeconds);
-
-    // ESP.deepSleep(sleepSeconds * 1000000);
   }
 
   void loop()
