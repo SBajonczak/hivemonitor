@@ -1,7 +1,7 @@
 {
     "wifi": {
         "ssid": "Ponyhof",
-        "password": ""
+        "password": "Tumalonga2411"
     },
     "mqtt": {
         "host": "192.168.178.201",
