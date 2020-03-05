@@ -46,7 +46,7 @@
   * it with a multimeter between VCC and GND at the ESP. Change the following value to e.g. 0.13
   * or -0.02 in case of a too high reading. Or set it using HomieSetting via config.json or WebApp/MQTT
   */
-  const float DEFAULT_VCC_ADJUST = -0.21;
+  const float DEFAULT_VCC_ADJUST = 0.23;
 
   HomieSetting<long> sleepTimeSetting("sleepTime", "SleepTime in seconds (max. 3600s!), default is 60s");
   HomieSetting<long> weightOffsetSetting("weightOffset", "Offset value to zero.");
@@ -110,12 +110,12 @@
   float vcc_adjust;
   int SLEEP_TIME;
 
-  HomieNode weightNode("weight", "weight");
-  HomieNode temperatureNode0("temperature0", "temperature");
-  HomieNode temperatureNode1("temperature1", "temperature");
-  HomieNode batteryNode("battery", "volt");
-  HomieNode batAlarmNode("battery", "alarm");
-  HomieNode jsonNode("data", "__json__"); //Hiveeyes.org compatibility format
+  HomieNode weightNode("weight", "weight","switch");
+  HomieNode temperatureNode0("temperature0", "temperature","switch");
+  HomieNode temperatureNode1("temperature1", "temperature","switch");
+  HomieNode batteryNode("battery", "volt","switch");
+  HomieNode batAlarmNode("battery", "alarm","switch");
+  HomieNode jsonNode("data", "__json__","switch"); //Hiveeyes.org compatibility format
 
   void setupHandler()
   {
@@ -160,6 +160,8 @@
   {
     digitalWrite(TANSISTORSWITCH,HIGH);
     scale.begin(DOUT, PD_SCK);
+    scale.power_up();
+delay(300);
     scale.set_scale(kilogramDividerSetting.get()); //initialize scale
     Homie.getLogger() << "DEBUG: Got kilogramDivider" << kilogramDividerSetting.get() << endl;
     scale.set_offset(weightOffsetSetting.get()); //initialize scale
@@ -169,15 +171,15 @@
     Homie.getLogger() << "Re  ading scale, hold on" << endl;
     for (int i = 0; i < 3; i++)
     {
-      scale.power_up();
       float WeightRaw = scale.get_units(3);
-      scale.power_down();
       //yield();
       Homie.getLogger() << "✔ Raw measurements: " << WeightRaw << " g" << endl;
       WeightSamples.add(WeightRaw);
       delay(500);
       yield();
     }
+      scale.power_down();
+
     digitalWrite(TANSISTORSWITCH,LOW);
 
     weight = WeightSamples.getMedian();
@@ -274,7 +276,7 @@
     case HomieEventType::NORMAL_MODE:
 
       timeout.attach(1.0, max_run);
-      getTemperatures();
+      // getTemperatures();
   #if USE_SCALE
       getWeight();
   #endif

@@ -10,14 +10,14 @@
         "username": "sascha",
         "password": "tumalonga2411"
     },
-    "name": "hive-teststand",
+    "name": "dev-evice",
     "ota": {
-        "enabled": false
+        "enabled": true
     },
-    "device_id": "hive-teststand",
+    "device_id": "dev-evice",
     "settings": {
-        "sleepTime": 9600,
-        "sendInterval": 9600,  
+        "sleepTime": 3600,
+        "sendInterval": 3600,  
         "weightOffset": 244017,
         "kilogramDivider": 22.27
     }
