@@ -38,4 +38,9 @@ In fact I use for now a Wemos d1 mini Huzzah instead of a ESP DEV Board.
 for now I testing it on a breadboard design. If I have a final design, I will create a PCB for this. For now my Setting looks like this:
 
 
-![rr](./Testset.jpg)
+![rr](./Schematic_Hive Mon V1_2021-01-02.jpg)
+
+
+## UploDING CONFIGURATIONS
+
+>> pio run -t uploadfs
