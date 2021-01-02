@@ -31,7 +31,7 @@ The following libaries are required:
 
 ## Hardware 
 I created a schematic overview: 
-![Circuit](././Schematic_Hive Mon V1_2021-01-02.png)
+![Circuit](./Schematic_Hive Mon V1_2021-01-02.png)
 
 In fact I use for now a Wemos d1 mini Huzzah instead of a ESP DEV Board. 
 
