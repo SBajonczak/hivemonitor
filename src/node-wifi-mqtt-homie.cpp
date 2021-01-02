@@ -20,10 +20,9 @@
   }
 
   // PINs
-  #define ONE_WIRE_BUS 14   // D5
+  #define ONE_WIRE_BUS 5   // D5
   #define DOUT 13           // D7
   #define PD_SCK 12         // D6
-  #define TANSISTORSWITCH 4 // D2
 
   /* 
     Use sketch BeeScale-Calibration.ino to determine these calibration values.
@@ -134,7 +133,6 @@
 
   void getTemperatures()
   {
-    digitalWrite(TANSISTORSWITCH,HIGH);
 
     sensors.begin();
     // call sensors.requestTemperatures() to issue a global temperature
@@ -153,12 +151,10 @@
       delay(100);
     }
     temperature1 = sensors.getTempCByIndex(1);
-  digitalWrite(TANSISTORSWITCH,LOW);
   }
 
   void getWeight()
   {
-    digitalWrite(TANSISTORSWITCH,HIGH);
     scale.begin(DOUT, PD_SCK);
     scale.set_scale(kilogramDividerSetting.get()); //initialize scale
     Homie.getLogger() << "DEBUG: Got kilogramDivider" << kilogramDividerSetting.get() << endl;
@@ -178,7 +174,6 @@
       delay(500);
       yield();
     }
-    digitalWrite(TANSISTORSWITCH,LOW);
 
     weight = WeightSamples.getMedian();
 
@@ -245,7 +240,7 @@
     else
     {
       batAlarmNode.setProperty("alarm").setRetained(true).send("false");
-      SLEEP_TIME = sleepTimeSetting.get();
+      SLEEP_TIME =1200;// sleepTimeSetting.get();
       Homie.getLogger() << "✔ Preparing for " << SLEEP_TIME << " seconds sleep" << endl;
     }
   }
@@ -261,7 +256,7 @@
       system_rtc_mem_write(RTC_STATE, buf, 1); // set state for next wakeUp
       ESP.deepSleep(SLEEP_TIME*1000000, WAKE_RF_DISABLED);
       */
-      SLEEP_TIME = sleepTimeSetting.get();
+      SLEEP_TIME = 1200;//sleepTimeSetting.get();
       Homie.getLogger() << "✔ Preparing for " << SLEEP_TIME << " seconds sleep" << endl;
       Homie.prepareToSleep();
     }

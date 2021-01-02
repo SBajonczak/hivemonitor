@@ -39,3 +39,8 @@ for now I testing it on a breadboard design. If I have a final design, I will cr
 
 
 ![rr](./Testset.jpg)
+
+
+## UploDING CONFIGURATIONS
+
+>> pio run -t uploadfs
