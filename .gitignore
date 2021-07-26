@@ -4,6 +4,8 @@
 .vscode/launch.json
 .vscode/ipch
 
+.idea
+.venv*
 
 
 # Created by https://www.gitignore.io/api/c++,visualstudio,visualstudiocode

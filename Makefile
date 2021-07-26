@@ -22,5 +22,5 @@ upload-config:
 
 
 setup-virtualenv:
-	@test -e $(python) || `command -v virtualenv` --python=python3 $(venvpath)
+	@test -e $(python) || python3 -m venv $(venvpath)
 	$(pip) install platformio
