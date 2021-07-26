@@ -3,11 +3,10 @@ This Code represents a Hive Monitoring System for any ESP Hardware (with enough 
 
 The Firmware contains the following Features: 
 
-
 * Measuring
-    * The Weight
-    * The Temperature (inside the Hive) 
-    * The Battery Voltage
+	* The Weight
+	* The Temperature (inside the Hive) 
+	* The Battery Voltage
 * Transmit the Measurement as JSON to an MQTT Server
 * Support Update OTA Server (to upload new firmware updates)
 * Deep Sleep (to enhance the battery lifetime)
@@ -46,12 +45,13 @@ I Ordered the following parts from my local seller
 * 1 x  10K 
 * 1 x TP4056
 
+
 My shematic wiring looks like this:
 ![Circuit](./wiring.png)
 
 
 ## Wiring H30A to HX711
-I wired the 'weightcell to the hx711 like this:
+I wired the weightcell to the hx711 like this:
 
 [Wiring](./h30A_hx711.png)
 
@@ -59,7 +59,7 @@ I wired the 'weightcell to the hx711 like this:
 # Configuration 
 The Configuration is done with an json file. An example of it looks like this:
 
-'''json
+```json
 {
 	"wifi":	{
 		"ssid": "SSID",
@@ -85,13 +85,15 @@ The Configuration is done with an json file. An example of it looks like this:
         "kilogramDivider": 22.27
   	}
 }
-'''
+```
+The following table will give you more insights about the settings.
+
 
 |Setting|Description|
 |-|-|
 |wifi.sid|the wifis name.|
 |wifi.password|The password for the wifi|
-|mqtt.host|The host for the mqtt. This can be a dns name or a ip adress.|
+|mqtt.host|The host for the mqtt. This can be a dns name or a ip address.|
 |mqtt.port|The Mqtt Port.|
 |mqtt.base_topic|If there is a prefix required for a topic, then you can set here the basetopic.|
 |mqtt.auth|__true__ when using authentication, or __false__ when not using it|
@@ -105,8 +107,30 @@ The Configuration is done with an json file. An example of it looks like this:
 |settings.weightOffset|The weight offset. This is neccessary for the adjustment of the weightcell. Because there are some base weights.|
 |settings.kilogramDivider|The divider to get the kilograms.|
 
-When you adjust the setting to meet your requirements, then you can easyly upload it with the gpio command.
+
+# How to compile
+First of all we must compile the complete project
+```
+	pio run
+```
+
+# Upload Firmare
+After a successful compile, you will be able to upload the firmware by the given command. 
+
+```
+	pio run -t upload
+```
+
+This send the firmware directly to the default attached board.
+
+
+# Configure the device Setting
+
+## Sending preconfigured config (Recommended)
+It will be easier for you t
 
 >  pio run -t uploadfs
 
+
+## Configure by the givin Homie interface
 
