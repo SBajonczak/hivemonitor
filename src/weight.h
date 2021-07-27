@@ -14,6 +14,7 @@ public:
   float getWeight();
   float getWeight(float temperatureForCompensation);
   float toKilogram(float getWeighMeasure);
+  bool DeviceReady();
 
 private:
   int _dtPin;

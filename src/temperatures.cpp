@@ -5,6 +5,7 @@
 
 int _oneWirePin;
 int _connectedDevices;
+
 OneWire oneWire();
 DallasTemperature sensors();
 TemperatureProcessor::TemperatureProcessor(int onwWirePin, int connectedDevices)
@@ -21,18 +22,25 @@ void TemperatureProcessor::setup()
     sensors.setOneWire(&this->oneWire);
 }
 
+int TemperatureProcessor::getDeviceCount()
+{
+    return sensors.getDeviceCount();
+}
+
 float TemperatureProcessor::getTemperature(int devicenumber)
 {
-
-    sensors.begin();
-    // call sensors.requestTemperatures() to issue a global temperature
-    // request to all devices on the bus
-    sensors.requestTemperatures(); // Send the command to get temperatures
-
-    float temperature = sensors.getTempCByIndex(devicenumber);
-    if (temperature == -127)
+    if (this->getDeviceCount() > 0)
     {
-        temperature = sensors.getTempCByIndex(devicenumber);
+        sensors.begin();
+        // call sensors.requestTemperatures() to issue a global temperature
+        // request to all devices on the bus
+        sensors.requestTemperatures(); // Send the command to get temperatures
+        float temperature = sensors.getTempCByIndex(devicenumber);
+        if (temperature == -127)
+        {
+            temperature = sensors.getTempCByIndex(devicenumber);
+        }
+        return temperature;
     }
-    return temperature;
+    return 0;
 }

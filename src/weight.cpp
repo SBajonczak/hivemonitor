@@ -52,16 +52,25 @@ float Weight::getWeight()
   return weight;
 }
 
+bool Weight::DeviceReady()
+{
+  return scale.is_ready();
+}
+
 float Weight::getWeight(float temperatureForCompensation)
 {
-  float weight = this->getWeight();
-  //temperature compensation
-  if (temperatureForCompensation < this->_calibrationTemperature)
-    weight = weight + (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
-  if (temperatureForCompensation > this->_calibrationTemperature)
-    weight = weight - (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
+  if (scale.is_ready())
+  {
+    float weight = this->getWeight();
+    //temperature compensation
+    if (temperatureForCompensation < this->_calibrationTemperature)
+      weight = weight + (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
+    if (temperatureForCompensation > this->_calibrationTemperature)
+      weight = weight - (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
 
-  return weight;
+    return weight;
+  }
+  return 0;
 }
 
 float Weight::toKilogram(float getWeighMeasure)

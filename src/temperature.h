@@ -15,7 +15,7 @@ public:
     TemperatureProcessor(int onwWirePin, int connectedDevices);
     void setup();
     float getTemperature(int devicenumber);
-
+    int getDeviceCount();
 private:
     OneWire oneWire;
     DallasTemperature sensors;
