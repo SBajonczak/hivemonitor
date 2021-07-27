@@ -34,7 +34,7 @@ void MeasureHandler::SetLowBattery(bool isLow)
 
 bool MeasureHandler::GetLowBattery()
 {
-  this->lowBattery;
+  return this->lowBattery;
 }
 
 void MeasureHandler::SetTemperatureValue(int index, float temperature)
