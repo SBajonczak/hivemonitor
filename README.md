@@ -1,7 +1,8 @@
-# Hive Monitor Software
-This Code represents a Hive Monitoring System for any ESP Hardware (with enough GPIO Ports ;)). 
+![image](https://github.com/SBajonczak/hivemonitor/workflows/PlatformIO%20CI/badge.svg)
+![image](https://img.shields.io/github/v/tag/SBajonczak/hivemonitor.svg)
 
-The Firmware contains the following Features: 
+# Hive Monitor Software
+
 
 * Measuring
 	* The Weight
@@ -12,11 +13,12 @@ The Firmware contains the following Features:
 * Deep Sleep (to enhance the battery lifetime)
 
 
+## Firmware
 
-## Dependencies
+### Dependencies
 
-This Software is based on the [Homie ESP 8266]( https://github.com/marvinroger/homie-esp8266) Framework.
-Because this delivery the basic functionality to communicate with a mqtt server and brings it own (easy) setting. 
+This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
+Because this delivery the basic functionality to communicate with a mqtt server and brings it own (easy) setting.
 
 The following libaries are required:
 
@@ -26,6 +28,25 @@ The following libaries are required:
 * Bounce2:            https://github.com/thomasfredericks/Bounce2
 * ESPAsyncTCP:        https://github.com/me-no-dev/ESPAsyncTCP
 * async-mqtt-client:  https://github.com/marvinroger/async-mqtt-client
+
+### Setup
+
+#### Build firmware
+```bash
+make build
+```
+
+#### Upload firmware
+```bash
+export PLATFORMIO_UPLOAD_PORT=/dev/ttyUSB0
+make upload-firmware
+```
+
+#### Upload configuration
+```bash
+export PLATFORMIO_UPLOAD_PORT=/dev/ttyUSB0
+make upload-config
+```
 
 
 # Hardware 
