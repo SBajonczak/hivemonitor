@@ -79,7 +79,6 @@ void onHomieEvent(const HomieEvent &event)
   case HomieEventType::WIFI_CONNECTED:
   case HomieEventType::MQTT_DISCONNECTED:
   case HomieEventType::MQTT_PACKET_ACKNOWLEDGED:
-  case HomieEventType::SENDING_STATISTICS:
     break;
   case HomieEventType::NORMAL_MODE:
 
