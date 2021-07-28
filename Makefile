@@ -20,7 +20,6 @@ upload-firmware:
 upload-config:
 	$(platformio) run --target uploadfs
 
-
 setup-virtualenv:
 	@test -e $(python) || `command -v virtualenv` --python=python3 $(venvpath)
 	$(pip) install platformio
