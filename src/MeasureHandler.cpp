@@ -34,7 +34,7 @@ void MeasureHandler::SetLowBattery(bool isLow)
 
 bool MeasureHandler::GetLowBattery()
 {
-  this->lowBattery;
+  return this->lowBattery;
 }
 
 void MeasureHandler::SetTemperatureValue(int index, float temperature)
@@ -88,7 +88,7 @@ void MeasureHandler::AdvertiseNodes()
 void MeasureHandler::SetVoltage(float voltage)
 {
 
-Serial.println("Got Voltage");
+  Serial.println("Got Voltage");
   this->voltage = voltage;
 }
 
