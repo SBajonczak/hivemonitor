@@ -1,7 +1,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <Wire.h>
-#include "temperature.h";
+#include "temperature.h"
 
 int _oneWirePin;
 int _connectedDevices;
