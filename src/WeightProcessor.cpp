@@ -2,7 +2,7 @@
   Weight.h - Lib for gtting weights 
 */
 #include "Arduino.h"
-#include "weight.h"
+#include "WeightProcessor.h"
 #include "HX711.h"
 #include <RunningMedian.h>
 
@@ -15,14 +15,14 @@ float _calibrationFactor;
 
 HX711 scale;
 
-Weight::Weight(int dtPin, int scPin)
+WeightProcessor::WeightProcessor(int dtPin, int scPin)
 {
   this->_dtPin = dtPin;
   this->_scPin = scPin;
   scale.begin(_dtPin, _scPin);
 }
 
-void Weight::setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor)
+void WeightProcessor::setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor)
 {
   this->_calibrationFactor = calibrationFactor;
   this->_calibrationTemperature = calibrationTemperature;
@@ -30,7 +30,7 @@ void Weight::setup(float kilogramDivider, float weightOffset, float calibrationT
   this->_weightOffset = weightOffset;
 }
 
-float Weight::getWeight()
+float WeightProcessor::getWeight()
 {
   RunningMedian WeightSamples = RunningMedian(3);
   scale.power_up();
@@ -40,7 +40,6 @@ float Weight::getWeight()
   for (int i = 0; i < 3; i++)
   {
     float WeightRaw = scale.get_units(3);
-    //yield();
     WeightSamples.add(WeightRaw);
     delay(500);
     yield();
@@ -51,12 +50,12 @@ float Weight::getWeight()
   return weight;
 }
 
-bool Weight::DeviceReady()
+bool WeightProcessor::DeviceReady()
 {
   return scale.wait_ready_timeout(500);
 }
 
-float Weight::getWeight(float temperatureForCompensation)
+float WeightProcessor::getWeight(float temperatureForCompensation)
 {
   if (scale.is_ready())
   {
@@ -72,7 +71,7 @@ float Weight::getWeight(float temperatureForCompensation)
   return 0;
 }
 
-float Weight::toKilogram(float getWeighMeasure)
+float WeightProcessor::toKilogram(float getWeighMeasure)
 {
   return getWeighMeasure / 1000;
 }

@@ -18,22 +18,29 @@
 ### Dependencies
 
 This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
-Because this delivery the basic functionality to communicate with a mqtt server and brings it own (easy) setting.
+
 
 The following libaries are required:
 
-* HX711:              https://github.com/bogde/HX711
-* RunningMedian:      https://github.com/RobTillaart/Arduino/tree/master/libraries/RunningMedian
-* Homie-esp8266:      https://github.com/marvinroger/homie-esp8266
-* Bounce2:            https://github.com/thomasfredericks/Bounce2
-* ESPAsyncTCP:        https://github.com/me-no-dev/ESPAsyncTCP
-* async-mqtt-client:  https://github.com/marvinroger/async-mqtt-client
+* [HX711](https://github.com/bogde/HX711)
+* [RunningMedian] (https://github.com/RobTillaart/Arduino/tree/master/libraries/RunningMedian)    
+* [Homie-esp8266](https://github.com/marvinroger/homie-esp8266)
+* ArduinoJson@^5.13.4
+* OneWire@^2.3.5
+* DallasTemperature@^3.9.1
+
+### Configured Platforms
+Actually the following Chips are supported
+
+* D1_Mini
+* ESP-f DEVKIT V4
+
 
 ### Setup
 
 #### Build firmware
 ```bash
-make build
+make build-complete
 ```
 
 #### Upload firmware

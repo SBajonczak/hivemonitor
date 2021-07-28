@@ -1,15 +1,15 @@
 /*
   Weight.h - Lib for gtting weights 
 */
-#ifndef Weight_h
-#define Weight_h
+#ifndef WeightProcessor_h
+#define WeightProcessor_h
 
 #include "Arduino.h"
 
-class Weight
+class WeightProcessor
 {
 public:
-  Weight(int dtPin, int scPin);
+  WeightProcessor(int dtPin, int scPin);
   void setup(float kilogramDivider, float weightOffset,float calibrationTemperature, float calibrationFactor);
   float getWeight();
   float getWeight(float temperatureForCompensation);

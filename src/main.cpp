@@ -1,6 +1,6 @@
 #include <Homie.h>
 #include <Ticker.h>
-#include "weight.h"
+#include "WeightProcessor.h"
 #include "temperature.h"
 #include "BatteryProcessor.h"
 #include "MeasureHandler.h"
@@ -40,7 +40,7 @@ int runtime_s = 0;
 Ticker timeout;
 
 // Get weight
-Weight scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
 TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
 MeasureHandler measures;
