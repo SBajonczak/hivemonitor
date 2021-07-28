@@ -8,10 +8,11 @@ int _connectedDevices;
 
 OneWire oneWire();
 DallasTemperature sensors();
-TemperatureProcessor::TemperatureProcessor(int onwWirePin, int connectedDevices)
+TemperatureProcessor::TemperatureProcessor(int onwWirePin)
 {
     this->_oneWirePin = onwWirePin;
-    this->_connectedDevices = connectedDevices;
+    this->setup();
+    this->_connectedDevices = this->getDeviceCount();
 }
 
 void TemperatureProcessor::setup()
@@ -24,7 +25,7 @@ void TemperatureProcessor::setup()
 
 int TemperatureProcessor::getDeviceCount()
 {
-    return sensors.getDeviceCount();
+    return this->_connectedDevices;
 }
 
 float TemperatureProcessor::getTemperature(int devicenumber)

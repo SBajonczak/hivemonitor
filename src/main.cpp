@@ -41,7 +41,7 @@ Ticker timeout;
 
 // Get weight
 Weight scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
-TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS,1);
+TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
 MeasureHandler measures;
 DeviceManager devicemanager;
