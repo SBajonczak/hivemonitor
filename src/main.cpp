@@ -16,10 +16,9 @@ const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x
 //function to round to two decimals
 
 // PINs
-#define ONE_WIRE_BUS 14   // D5
-#define DOUT 13           // D7
-#define PD_SCK 12         // D6
-#define TANSISTORSWITCH 4 // D2
+// #define GPIO_ONEWIRE_BUS 1
+// #define GPIO_HX711_DT 1
+// #define GPIO_HX711_SCK 1
 
 ADC_MODE(ADC_VCC);
 
@@ -41,8 +40,8 @@ int runtime_s = 0;
 Ticker timeout;
 
 // Get weight
-Weight scaledevice(DOUT, PD_SCK);
-TemperatureProcessor temperatures(ONE_WIRE_BUS, 1);
+Weight scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS,1);
 BatteryProcessor batteryProcessor;
 MeasureHandler measures;
 DeviceManager devicemanager;
@@ -95,8 +94,11 @@ void onHomieEvent(const HomieEvent &event)
 
     if (scaledevice.DeviceReady())
     {
-      Homie.getLogger() << "DEBUG: Tr to get scale value!" << endl;
-      measures.SetWeightValue(scaledevice.getWeight(measures.GetTemperaturValue(1)));
+      Homie.getLogger() << "DEBUG: Try to get scale value!" << endl;
+      float weight=scaledevice.getWeight(measures.GetTemperaturValue(1));
+      measures.SetWeightValue(weight);
+      Homie.getLogger() << "DEBUG: Got Scale value: "<< weight << endl;
+
     }
     else
     {
@@ -151,16 +153,27 @@ void setup()
 {
   Homie.disableResetTrigger();
   Homie.disableLedFeedback(); // collides with Serial on ESP07
-
-  WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
+  WiFi.forceSleepBegin();     // send wifi directly to sleep to reduce power consumption
 
   Serial.begin(115200);
   Homie.getLogger() << endl;
+
+  Homie.getLogger() << "GPIO_ONEWIRE_BUS: " << GPIO_ONEWIRE_BUS << endl;
+  Homie.getLogger() << "GPIO_HX711_SCK: " << GPIO_HX711_SCK << endl;
+  Homie.getLogger() << "GPIO_HX711_DT: " << GPIO_HX711_DT << endl;
+
+  if (devicemanager.IsColdstart())
+  {
+    Homie.getLogger() << "DEBUG: Is Coldstart set new initial State" << endl;
+    devicemanager.SetStateAndMagicNumberToMemory();
+    devicemanager.SetStateToMemory(STATE_COLDSTART);
+  }
   devicemanager.ReadStateFromMemory();
   // // now the restart cause is clear, handle the different states
   Serial.printf("State: %d\r\n", devicemanager.GetCurrentState());
   switch (devicemanager.GetCurrentState())
   {
+  default: // Catch all unknown states
   case STATE_SLEEP_WAKE:
     // first run after power on - initializes
   case STATE_COLDSTART:
@@ -195,8 +208,6 @@ void setup()
     Homie.setup();
     break;
   }
-
-  Serial.println("\n\nWake up");
 }
 
 void loop()
