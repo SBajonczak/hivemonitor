@@ -19,6 +19,7 @@ Weight::Weight(int dtPin, int scPin)
 {
   this->_dtPin = dtPin;
   this->_scPin = scPin;
+  scale.begin(_dtPin, _scPin);
 }
 
 void Weight::setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor)
@@ -32,8 +33,6 @@ void Weight::setup(float kilogramDivider, float weightOffset, float calibrationT
 float Weight::getWeight()
 {
   RunningMedian WeightSamples = RunningMedian(3);
-
-  scale.begin(_dtPin, _scPin);
   scale.power_up();
   delay(100);
   scale.set_scale(this->_kilogramDivider); //initialize scale
@@ -54,7 +53,7 @@ float Weight::getWeight()
 
 bool Weight::DeviceReady()
 {
-  return scale.is_ready();
+  return scale.wait_ready_timeout(500);
 }
 
 float Weight::getWeight(float temperatureForCompensation)
