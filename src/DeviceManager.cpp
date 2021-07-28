@@ -39,18 +39,20 @@ void DeviceManager::SetStateToMemory(byte value)
 void DeviceManager::SetStateAndMagicNumberToMemory()
 {
   byte buf[2]; //__attribute__((aligned(4)));
-  buf[0] = 0x55;
-  buf[1] = 0xaa;
+  buf[0] = 0x55; // 85
+  buf[1] = 0xaa; // 170
   //set and write the magic number
-  system_rtc_mem_write(RTC_BASE, buf, 1);
+  system_rtc_mem_write(RTC_BASE, buf, 2);
 }
 
 bool DeviceManager::IsColdstart()
 {
   byte buf[2]; // __attribute__((aligned(4)));
   //set and write the magic number
-  system_rtc_mem_write(RTC_BASE, buf, 2);
+  system_rtc_mem_read(RTC_BASE, buf, 2);
+  this->SetStateAndMagicNumberToMemory();
   return (buf[0] != 0x55) || (buf[1] != 0xaa);
+
 }
 
 void DeviceManager::SetState(byte state)
