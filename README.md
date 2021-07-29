@@ -3,7 +3,7 @@
 
 [[__TOC__]]
 
-# Hive Monitor Software
+# General Information
 This Software is build for Beekeepers, to collect some measurements and allows you to get some insights in your hive. 
 
 ## Key Feautres
@@ -19,8 +19,10 @@ In addition with a solar cell, you are free to use without a powerplug!
 
 You can Update your device by connecting it to your pc, or you use the OTA method.
 
-## Dependencies
+## Technologies
+This project will not work alone, so it has dependencies. 
 
+### Dependencies
 This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
 
 The following libaries are required:
@@ -163,29 +165,9 @@ The following table will give you more insights about the settings.
 |settings.kilogramDivider|The divider to get the kilograms.|
 
 
-# How to compile
-First of all we must compile the complete project
-```
-	pio run
-```
-
-# Upload Firmare
-After a successful compile, you will be able to upload the firmware by the given command. 
-
-```
-	pio run -t upload
-```
-
-This send the firmware directly to the default attached board.
-
-
-# Configure the device Setting
-
 ## Sending preconfigured config (Recommended)
-It will be easier for you t
+After you modified the configuration to your setting, you can upload this to your device.
 
->  pio run -t uploadfs
-
-
-## Configure by the givin Homie interface
-
+```bash
+ make upload-config
+```
