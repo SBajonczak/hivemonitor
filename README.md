@@ -221,8 +221,8 @@ For future Releases I planning to improve some thing and extend it with the foll
 
 * Support Lora
 * Adding custom Webinterface to Configure the Device within the wireles connection
-* Adding Maintenance Mode
-(Especcially when you work at the bees)
+* ~~Adding Maintenance Mode
+(Especcially when you work at the bees)~~ DONE
 
 
 Feel free to suggest me more Features.
