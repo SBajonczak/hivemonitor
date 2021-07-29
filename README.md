@@ -81,6 +81,50 @@ You can Build your firmware very easyly with the following command:
 make build-complete
 ```
 
+## Environments
+
+I created two environments. 
+
+* esp12e/minimal
+* esp12e/complete
+
+The minimal enviroments reduce the image size.
+
+This will be done by setting the compilerflags for the Homie Framework see [here](https://homieiot.github.io/homie-esp8266/docs/3.0.0/advanced-usage/compiler-flags/) for more info about this. 
+
+## Using Compilerflags
+
+I decided to use Compilerflags to configure the port mappings. So you will be able to modifie the used ports by modifying the flags instead in the source. 
+
+|Flag|Description|Default|
+|-|-|-|
+|GPIO_HX711_DT|The DT Port for the HX711 device|13 (D7)|
+|GPIO_HX711_SCK|The SCK Port for the HX711 device|12 (D6)|
+|GPIO_ONEWIRE_BUS|This will be used for the onewire temperture sensors. It declares the data bus|14 (D5)|
+|GPIO_MAINTENANCE_PIN|The Switch or Button, that tells the System that the hive must not operate. |15 (D8)|
+
+This looks like: 
+```ini
+[env:esp12e/complete]
+platform = espressif8266
+board = d1_mini
+framework = arduino
+build_flags = -D PIO_FRAMEWORK_ARDUINO_LWIP2_LOW_MEMORY 
+                -D GPIO_HX711_DT=13         ;D7
+                -D GPIO_HX711_SCK=12        ;D6
+                -D GPIO_ONEWIRE_BUS=14      ;D5
+                -D GPIO_MAINTENANCE_PIN=15  ;D8
+lib_deps = 
+    https://github.com/homieiot/homie-esp8266/#fix/711-Espressif8266-v3.0.0
+    ;ArduinoJson@^5.13.4
+    OneWire@^2.3.5
+    DallasTemperature@^3.9.1
+    bogde/HX711@^0.7.4
+    RunningMedian@^0.3.0
+monitor_speed = 115200
+lib_compat_mode = strict
+```
+
 ## :rocket: Upload the firmware
 After a successfull build you can upload it to your connected device with: 
 
