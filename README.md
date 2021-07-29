@@ -8,6 +8,7 @@
   - [Configured Platforms](#configured_platforms)
   - [Development](#package-development)
   - [Pre-Requisites](#notebook-pre-Requisites)
+  - [Branches](#cactus-branches)
 - [Development Environment](#nut_and_bolt-development_environment)
   - [Build the Firmware](#hammer-build_the_firmware)
   - [Upload firmware](#rocket-upload_the__firmware)
@@ -57,6 +58,13 @@ The following libaries are required:
 * ArduinoJson@^5.13.4
 * OneWire@^2.3.5
 * DallasTemperature@^3.9.1
+## :cactus: Branches
+Here some description about the used branches
+
+|Branch|Description|
+|-|-|
+|master|This contains the latest stable version|
+|development|In this branch, I will put every development work for now. This branch is __NOT__ stable|
 
 
 # :nut_and_bolt: Development Environment
