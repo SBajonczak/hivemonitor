@@ -142,15 +142,18 @@ I Ordered the following parts from my local seller
 * 1 x TP4056
 
 ## Wiring Schema
-Together you can wire it up lik this schematic circuit:
-![Circuit](./wiring.png)
+To wire it up, you can follow this schematic design
+
+![Circuit](./Distribution/V1/Schematic.png)
+
+If you want, you can order a PCB by this design. 
+You will find it [here](./Distribution/V1/Gerber_PCB_Hivemonitor_V1.zip)
 
 ## Wiring H30A to HX711
 
 I was sometimes confused about the wiring of the loadcell to the HX711. So I decided to write down the wirings here to:
 
 [Wiring](./h30A_hx711.png)
-
 
 # Configuration 
 The Configuration is done with an json file. An example of it looks like this:
