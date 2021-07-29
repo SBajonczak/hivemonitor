@@ -3,12 +3,10 @@
 
 [[__TOC__]]
 
-# General Information
+# :beginner: General Information
 This Software is build for Beekeepers, to collect some measurements and allows you to get some insights in your hive. 
 
-## Key Feautres
-
-You can measure: 
+With this you can automatically measure: 
 
 * The Weight
 * The Temperature (outside and inside the Hive) 
@@ -22,7 +20,17 @@ You can Update your device by connecting it to your pc, or you use the OTA metho
 ## Technologies
 This project will not work alone, so it has dependencies. 
 
-### Dependencies
+### Configured Platforms
+Actually it was Build and Testet on the following devices
+
+* D1_Mini
+* D1 Mini Huzzah
+* ESP 8266 Devboard
+
+## :package: Development
+
+
+### :notebook:Pre-Requisites
 This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
 
 The following libaries are required:
@@ -34,39 +42,22 @@ The following libaries are required:
 * OneWire@^2.3.5
 * DallasTemperature@^3.9.1
 
-Wehn you build it with Platform IO (recommended) you can build it out of the box.
 
-### Configured Platforms
-Actually it was Build and Testet on the following devices
-
-* D1_Mini
-* D1 Mini Huzzah
-* ESP 8266 Devboard
-
-## Getting startet
+### :nut_and_bolt: Development Environment
 First of all, the follwing commands required an installation of Platform IO. You can install it with the follwoing command: 
 
 ```bash
 setup-virtualenv
 ```
 
-This will install Platform IO in a virutal Enviroment, from now on you can execute the build and Upload it into your connected device.
-
-The Installation contains 3 Parts
-
-1. Build the Firmare
-2. Firmware Upload
-3. Upload the Configuration
-
-
-### How to Build the Firmware
+### :hammer: Build the Firmware
 You can Build your firmware very easyly with the following command:
 
 ```bash
 make build-complete
 ```
 
-#### How to upload firmware
+#### :rocket: Upload firmware
 After a successfull build you can upload it to your connected device with: 
 
 ```bash
@@ -80,13 +71,13 @@ export PLATFORMIO_UPLOAD_PORT=/dev/ttyUSB0
 
 This upload the firmware throught the /dev/ttyUSB0 port.
 
-#### How to upload the configuration
+#### :page_facing_up: Upload the configuration
 ```bash
 export PLATFORMIO_UPLOAD_PORT=/dev/ttyUSB0
 make upload-config
 ```
 
-# Hardwaresetup 
+# :electric_plug:  Hardwaresetup 
 The following section will describe the hardware construction
 
 ## Components List (for Electronic curcuit)
