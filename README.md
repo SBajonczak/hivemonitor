@@ -1,9 +1,25 @@
 ![image](https://github.com/SBajonczak/hivemonitor/workflows/PlatformIO%20CI/badge.svg)
 ![image](https://img.shields.io/github/v/tag/SBajonczak/hivemonitor.svg)
 
-[[__TOC__]]
+## :ledger: Index
 
-# :beginner: General Information
+- [About](#beginner-about)
+- [Technologies](#zap-technologies)
+  - [Configured Platforms](#Configured_Platforms)
+  - [Development](#package-Development)
+  - [Pre-Requisites](#notebook-pre-Requisites)
+- [Development Environment](#nut_and_bolt-Development_Environment)
+  - [Build the Firmware](#hammer-Build_the_Firmware)
+  - [Upload firmware](#rocket-Upload_the__firmware)
+  - [Upload the configuration](#page_facing_up-Upload_the_configuration)  
+- [Hardwaresetup](#electric_plug-Hardwaresetup)
+  - [Components List](#Components_List)
+  - [Wiring Schema](#Wiring_Schema)
+  - [Wiring H30A to HX711](#Wiring_H30A_to_HX711)
+- [Configuration](#Configuration)
+  - [Upload_Configuration](#Upload_Configuration)
+- [Planned Features](#Planned_Features)
+# :beginner: About
 This Software is build for Beekeepers, to collect some measurements and allows you to get some insights in your hive. 
 
 With this you can automatically measure: 
@@ -17,10 +33,10 @@ In addition with a solar cell, you are free to use without a powerplug!
 
 You can Update your device by connecting it to your pc, or you use the OTA method.
 
-## Technologies
+# Technologies
 This project will not work alone, so it has dependencies. 
 
-### Configured Platforms
+## Configured Platforms
 Actually it was Build and Testet on the following devices
 
 * D1_Mini
@@ -30,7 +46,7 @@ Actually it was Build and Testet on the following devices
 ## :package: Development
 
 
-### :notebook:Pre-Requisites
+## :notebook:Pre-Requisites
 This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
 
 The following libaries are required:
@@ -43,21 +59,21 @@ The following libaries are required:
 * DallasTemperature@^3.9.1
 
 
-### :nut_and_bolt: Development Environment
+# :nut_and_bolt: Development Environment
 First of all, the follwing commands required an installation of Platform IO. You can install it with the follwoing command: 
 
 ```bash
 setup-virtualenv
 ```
 
-### :hammer: Build the Firmware
+## :hammer: Build the Firmware
 You can Build your firmware very easyly with the following command:
 
 ```bash
 make build-complete
 ```
 
-#### :rocket: Upload firmware
+## :rocket: Upload the firmware
 After a successfull build you can upload it to your connected device with: 
 
 ```bash
@@ -71,7 +87,7 @@ export PLATFORMIO_UPLOAD_PORT=/dev/ttyUSB0
 
 This upload the firmware throught the /dev/ttyUSB0 port.
 
-#### :page_facing_up: Upload the configuration
+## :page_facing_up: Upload the configuration
 ```bash
 export PLATFORMIO_UPLOAD_PORT=/dev/ttyUSB0
 make upload-config
@@ -80,7 +96,7 @@ make upload-config
 # :electric_plug:  Hardwaresetup 
 The following section will describe the hardware construction
 
-## Components List (for Electronic curcuit)
+## Components List
 I Ordered the following parts from my local seller
 
 * 1 x [Hx711](https://www.amazon.de/Verst%C3%A4rker-Gewichtssensoren-Anzeige-Modul-Digital-Konverter-Mikrocontroller/dp/B07MTYT95R/ref=asc_df_B07MTYT95R)
@@ -94,6 +110,7 @@ I Ordered the following parts from my local seller
 * 1 x  10K 
 * 1 x TP4056
 
+## Wiring Schema
 Together you can wire it up lik this schematic circuit:
 ![Circuit](./wiring.png)
 
@@ -156,7 +173,7 @@ The following table will give you more insights about the settings.
 |settings.kilogramDivider|The divider to get the kilograms.|
 
 
-## Sending preconfigured config (Recommended)
+## Upload_Configuration
 After you modified the configuration to your setting, you can upload this to your device.
 
 ```bash
