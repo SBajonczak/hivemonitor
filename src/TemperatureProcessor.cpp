@@ -1,13 +1,14 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <Wire.h>
-#include "temperature.h"
+#include "TemperatureProcessor.h"
 
 int _oneWirePin;
 int _connectedDevices;
 
-OneWire oneWire();
-DallasTemperature sensors();
+OneWire oneWire;
+DallasTemperature sensors;
+
 TemperatureProcessor::TemperatureProcessor(int onwWirePin)
 {
     this->_oneWirePin = onwWirePin;
@@ -21,6 +22,8 @@ void TemperatureProcessor::setup()
     // Pass our OneWire reference to Dallas Temperature.
     oneWire.begin(this->_oneWirePin);
     sensors.setOneWire(&this->oneWire);
+    
+    sensors.begin();
 }
 
 int TemperatureProcessor::getDeviceCount()
@@ -32,14 +35,12 @@ float TemperatureProcessor::getTemperature(int devicenumber)
 {
     if (this->getDeviceCount() > 0)
     {
-        sensors.begin();
-        // call sensors.requestTemperatures() to issue a global temperature
-        // request to all devices on the bus
-        sensors.requestTemperatures(); // Send the command to get temperatures
-        float temperature = sensors.getTempCByIndex(devicenumber);
-        if (temperature == -127)
+        sensors.requestTemperatures();                             // Send the command to get temperatures from all devices
+        float temperature = sensors.getTempCByIndex(0); // Read the temp from the specific device
+        if (temperature == DEVICE_DISCONNECTED_C)
         {
-            temperature = sensors.getTempCByIndex(devicenumber);
+
+            return -1; // Device not connected.
         }
         return temperature;
     }
