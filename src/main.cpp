@@ -72,6 +72,7 @@ void onHomieEvent(const HomieEvent &event)
   case HomieEventType::WIFI_CONNECTED:
   case HomieEventType::MQTT_DISCONNECTED:
   case HomieEventType::MQTT_PACKET_ACKNOWLEDGED:
+  case HomieEventType::SENDING_STATISTICS:
     break;
   case HomieEventType::NORMAL_MODE:
 
@@ -144,15 +145,25 @@ void setup()
 {
   Homie.disableResetTrigger();
   Homie.disableLedFeedback(); // collides with Serial on ESP07
-  WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
+  WiFi.forceSleepBegin();     // send wifi directly to sleep to reduce power consumption
   Serial.begin(115200);
-
   Homie.getLogger() << endl;
+  Homie.getLogger() << "///////////////////////////////////////////" << endl;
+  Homie.getLogger() << "GPIO_MAINTENANCE_PIN: " << GPIO_MAINTENANCE_PIN << endl;
   Homie.getLogger() << "GPIO_ONEWIRE_BUS: " << GPIO_ONEWIRE_BUS << endl;
   Homie.getLogger() << "GPIO_HX711_SCK: " << GPIO_HX711_SCK << endl;
   Homie.getLogger() << "GPIO_HX711_DT: " << GPIO_HX711_DT << endl;
   Homie.getLogger() << "FW_NAME: " << FW_NAME << endl;
   Homie.getLogger() << "FW_VERSION: " << FW_VERSION << endl;
+  Homie.getLogger() << "Setup Maintenance pin: " << GPIO_MAINTENANCE_PIN << endl;
+  Homie.getLogger() << "///////////////////////////////////////////" << endl;
+  if (devicemanager.GetOperatingState() == OperatingStates::Maintenance)
+  {
+    Homie.getLogger() << "INFO: Device in Maintenance. Go to sleep" << endl;
+    devicemanager.GotToSleep();
+    return;
+  }
+  Homie.getLogger() << "INFO: Device in normal mode." << endl;
 
   if (devicemanager.IsColdstart())
   {

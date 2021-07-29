@@ -15,6 +15,12 @@
 #define STATE_SLEEP_WAKE 1
 #define STATE_CONNECT_WIFI 4
 
+enum OperatingStates
+{
+  Maintenance = 1,
+  Operating = 2
+};
+
 class DeviceManager
 {
 
@@ -25,20 +31,26 @@ public:
   void SetSleepTime(int time);
   // Get the sleeptime in Seconds
   int GetSleepTime();
+  // Do some Setup
+  void Setup();
+
   /* 
     Sets the ESP Device to sleep, it convert the sleeptime autmatically into ms. 
     It will also set the next state for the wakeup process.
   */
   void GotToSleep();
   void GotToSleep(WakeMode mode);
-
   byte ReadStateFromMemory();
   void SetStateToMemory(byte value);
   void SetStateAndMagicNumberToMemory();
   bool IsColdstart();
   void SetState(byte state);
   byte GetCurrentState();
+  // Get the actual Operating State
+  OperatingStates GetOperatingState();
+
 private:
+  OperatingStates operatingState;
   int SleepTime;
   byte CurrentState;
 };
