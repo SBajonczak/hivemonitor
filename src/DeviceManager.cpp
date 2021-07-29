@@ -85,8 +85,6 @@ byte DeviceManager::GetCurrentState()
 OperatingStates DeviceManager::GetOperatingState()
 {
   int result = digitalRead(GPIO_MAINTENANCE_PIN);
-  Homie.getLogger() << "Result" << result << endl;
-
   if (result == HIGH)
   {
     return OperatingStates::Maintenance;
