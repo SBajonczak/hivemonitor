@@ -171,3 +171,16 @@ After you modified the configuration to your setting, you can upload this to you
 ```bash
  make upload-config
 ```
+
+# Planned Features
+I use this devices for my hives to. So I am not ready yet. 
+
+For future Releases I planning to improve some thing and extend it with the following planned features:
+
+* Support Lora
+* Adding custom Webinterface to Configure the Device within the wireles connection
+* Adding Maintenance Mode
+(Especcially when you work at the bees)
+
+
+Feel free to suggest me more Features.
