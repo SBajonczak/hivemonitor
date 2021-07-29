@@ -7,12 +7,12 @@
   */
 const float LOW_BATTERY = 1.1;
 
-HomieNode Nodeweight("weight", "weight", "switch");
-HomieNode Nodetemperature0("temperature0", "temperature", "switch");
-HomieNode Nodetemperature1("temperature1", "temperature", "switch");
-HomieNode Nodebattery("battery", "volt", "switch");
-HomieNode NodebatAlarm("battery", "alarm", "switch");
-HomieNode Nodejson("data", "__json__", "switch"); //Hiveeyes.org compatibility format
+HomieNode Nodeweight("weight", "switch");
+HomieNode Nodetemperature0("temperature0",  "switch");
+HomieNode Nodetemperature1("temperature1",  "switch");
+HomieNode Nodebattery("battery", "switch");
+HomieNode NodebatAlarm("battery",  "switch");
+HomieNode Nodejson("data",  "switch"); //Hiveeyes.org compatibility format
 
 MeasureHandler::MeasureHandler()
 {

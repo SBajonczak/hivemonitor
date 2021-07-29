@@ -12,7 +12,7 @@
 class TemperatureProcessor
 {
 public:
-    TemperatureProcessor(int onwWirePin, int connectedDevices);
+    TemperatureProcessor(int onwWirePin);
     void setup();
     float getTemperature(int devicenumber);
     int getDeviceCount();
