@@ -1,25 +1,19 @@
 #include <Homie.h>
 #include <Ticker.h>
 #include "WeightProcessor.h"
-#include "temperature.h"
+#include "TemperatureProcessor.h"
 #include "BatteryProcessor.h"
 #include "MeasureHandler.h"
 #include "DeviceManager.h"
 #include "ConfigurationManager.h"
 
-#define FW_NAME "hive-2"
+#define FW_NAME "Development"
 #define FW_VERSION "0.10.0"
 
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
 const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x48\xd4\x1a";
 
-//function to round to two decimals
-
-// PINs
-// #define GPIO_ONEWIRE_BUS 1
-// #define GPIO_HX711_DT 1
-// #define GPIO_HX711_SCK 1
-
+// Set the Mode for the BAttery measuring
 ADC_MODE(ADC_VCC);
 
 // deep sleep infrastructure
@@ -95,10 +89,9 @@ void onHomieEvent(const HomieEvent &event)
     if (scaledevice.DeviceReady())
     {
       Homie.getLogger() << "DEBUG: Try to get scale value!" << endl;
-      float weight=scaledevice.getWeight(measures.GetTemperaturValue(1));
+      float weight = scaledevice.getWeight(measures.GetTemperaturValue(1));
       measures.SetWeightValue(weight);
-      Homie.getLogger() << "DEBUG: Got Scale value: "<< weight << endl;
-
+      Homie.getLogger() << "DEBUG: Got Scale value: " << weight << endl;
     }
     else
     {
@@ -106,8 +99,6 @@ void onHomieEvent(const HomieEvent &event)
     }
 
     measures.SetVoltage(batteryProcessor.getVolt());
-
-    // Homie.getLogger() << "DEBUG: After measurements: " << millis() / 1000 << endl;
     break;
 
   case HomieEventType::WIFI_DISCONNECTED:
@@ -153,14 +144,15 @@ void setup()
 {
   Homie.disableResetTrigger();
   Homie.disableLedFeedback(); // collides with Serial on ESP07
-  WiFi.forceSleepBegin();     // send wifi directly to sleep to reduce power consumption
-
+  WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
   Serial.begin(115200);
-  Homie.getLogger() << endl;
 
+  Homie.getLogger() << endl;
   Homie.getLogger() << "GPIO_ONEWIRE_BUS: " << GPIO_ONEWIRE_BUS << endl;
   Homie.getLogger() << "GPIO_HX711_SCK: " << GPIO_HX711_SCK << endl;
   Homie.getLogger() << "GPIO_HX711_DT: " << GPIO_HX711_DT << endl;
+  Homie.getLogger() << "FW_NAME: " << FW_NAME << endl;
+  Homie.getLogger() << "FW_VERSION: " << FW_VERSION << endl;
 
   if (devicemanager.IsColdstart())
   {
