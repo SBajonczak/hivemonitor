@@ -7,13 +7,13 @@
   */
 const float LOW_BATTERY = 1.1;
 
+HomieNode Nodeweight("weight",  "switch");
+HomieNode Nodetemperature0("temperature0",  "switch");
+HomieNode Nodetemperature1("temperature1",  "switch");
+HomieNode Nodebattery("battery",  "switch");
+HomieNode NodebatAlarm("battery",  "switch");
+HomieNode Nodejson("data",  "switch"); //Hiveeyes.org compatibility format
 
-HomieNode Nodeweight("weight", "weight", "switch");
-HomieNode Nodetemperature0("temperature0", "temperature", "switch");
-HomieNode Nodetemperature1("temperature1", "temperature", "switch");
-HomieNode Nodebattery("battery", "volt", "switch");
-HomieNode NodebatAlarm("battery", "alarm", "switch");
-HomieNode Nodejson("data", "__json__", "switch"); //Hiveeyes.org compatibility format
 
 MeasureHandler::MeasureHandler()
 {
@@ -111,14 +111,14 @@ void MeasureHandler::SubmitData()
 
   Homie.getLogger() << "Corrected Input Voltage: " << voltage << " V" << endl;
   Nodebattery.setProperty("volt").setRetained(true).send(String(voltage));
-  DynamicJsonDocument doc(200);
+  StaticJsonBuffer<200> jsonBuffer;
 
-//  JsonObject &root = jsonBuffer.createObject();
-  doc["Weight"] = round2two(this->weight);
-  doc["Temp1"] = round2two(temperature0);
-  doc["Temp2"] = round2two(temperature1);
-  doc["VCC"] = round2two(voltage);
-  serializeJson(doc, values);
+  JsonObject &root = jsonBuffer.createObject();
+  root["Weight"] = round2two(this->weight);
+  root["Temp1"] = round2two(temperature0);
+  root["Temp2"] = round2two(temperature1);
+  root["VCC"] = round2two(voltage);
+  root.printTo(values);
   //root.printTo(values);
   // Homie.getLogger() << "Json data:" << values << endl;
   Nodejson.setProperty("__json__").setRetained(false).send(values);
