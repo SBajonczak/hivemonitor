@@ -2,7 +2,6 @@ name: PlatformIO CI
 
 on:
   push:
-    branches: [ master ]
   pull_request:
 
 jobs:
@@ -37,4 +36,4 @@ jobs:
           pip install --upgrade platformio
 
       - name: Run build
-        run: pio run
+        run: pio run -e esp12e/complete
