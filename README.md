@@ -52,7 +52,7 @@ This Software is based on the [Homie for ESP8266](https://github.com/marvinroger
 The following libaries are required:
 
 * [HX711](https://github.com/bogde/HX711)
-* [RunningMedian] (https://github.com/RobTillaart/Arduino/tree/master/libraries/RunningMedian)    
+* [RunningMedian](https://github.com/RobTillaart/Arduino/tree/master/libraries/RunningMedian)    
 * [Homie-esp8266](https://github.com/marvinroger/homie-esp8266)
 * ArduinoJson@^5.13.4
 * OneWire@^2.3.5
