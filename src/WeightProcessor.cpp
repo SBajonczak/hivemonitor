@@ -75,3 +75,4 @@ float WeightProcessor::toKilogram(float getWeighMeasure)
 {
   return getWeighMeasure / 1000;
 }
+

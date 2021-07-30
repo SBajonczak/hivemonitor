@@ -6,6 +6,7 @@
 #include "MeasureHandler.h"
 #include "DeviceManager.h"
 #include "ConfigurationManager.h"
+#include "TareUtility.h"
 
 #define FW_NAME "Development"
 #define FW_VERSION "0.10.0"
@@ -40,6 +41,9 @@ BatteryProcessor batteryProcessor;
 MeasureHandler measures;
 DeviceManager devicemanager;
 ConfigurationManager configurationManager;
+
+TareUtility procs(&scaledevice);
+
 void setupHandler()
 {
   measures.setup();
@@ -163,6 +167,7 @@ void setup()
     devicemanager.GotToSleep();
     return;
   }
+
   Homie.getLogger() << "INFO: Device in normal mode." << endl;
 
   if (devicemanager.IsColdstart())

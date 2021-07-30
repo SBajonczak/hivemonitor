@@ -15,7 +15,8 @@ public:
   float getWeight(float temperatureForCompensation);
   float toKilogram(float getWeighMeasure);
   bool DeviceReady();
-
+  // Performs an automatic tare for the first run
+  void AutoTare();
 private:
   int _dtPin;
   int _scPin;
