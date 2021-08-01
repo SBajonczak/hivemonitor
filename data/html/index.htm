@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+	<meta charset="utf-8">
+	<meta name="theme-color" content="#222222">
+	<meta content="yes" name="apple-mobile-web-app-capable">
+	<title>Hive-Monitor</title>
+	<script src="index.js"></script>
+	<script>function feedback(){}</script>
+	<style>
+		@import url("index.css");
+	</style>
+	</head>
+<body onload="onLoad()">
+
+<div id="cv" class="overlay">Load Hive Monitor UI...</div>
+<noscript><div class="overlay" style="opacity:1;">Sorry, Hive Monitor needs JavaScript!</div></noscript>
+<div id="bg"></div>
+
+<div class="wrapper" id="top">
+
+	<div class="tab top">
+		<div class="btnwrap">
+			<button id="btnTare" onclick="toogleAutoTare()"><p class="tab-label">Initial weight Tare</p></button>
+		</div>
+    </div>
+</div>
+
+<div>
+	<div id="ct"></div>
+</div>
+<div id="connind"></div>
+<div id="toast"></div>
+</html>
