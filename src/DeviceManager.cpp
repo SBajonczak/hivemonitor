@@ -1,7 +1,16 @@
-
 #include <DeviceManager.h>
+#include <ESPAsyncWebServer.h>
+
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+
+#include "html\html_ui.h"
+#include "TareUtility.h"
+
+AsyncWebServer server(80);
 
 void DeviceManager::setup() {}
+
 DeviceManager::DeviceManager()
 {
 }
@@ -90,4 +99,67 @@ OperatingStates DeviceManager::GetOperatingState()
     return OperatingStates::Maintenance;
   }
   return OperatingStates::Operating;
+}
+
+void DeviceManager::ServeWebui()
+{
+  WiFi.softAP("HiveMonitor", "123");
+  if (WiFi.waitForConnectResult() != WL_CONNECTED)
+  {
+    Serial.printf("WiFi Failed!\n");
+    return;
+  }
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
+
+  server.on("/tarestep0", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
+              WeightProcessor *scaledevice = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
+              if (scaledevice->DeviceReady())
+              {
+                float offset = scaledevice->getWeight(0);
+                Serial.println("Offset");
+                Serial.println(offset);
+                 request->send(200);
+              }
+              else
+              {
+                Serial.println("Not available");
+                request->send(500, "text"
+                                   "Scale not ready or connected!");
+              }
+             
+            });
+
+  server.on(
+      "/tarestep1", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+      {
+        
+        // WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+        // if (scaledevice.DeviceReady())
+        // {
+
+        //   float offset = scaledevice.getWeight(0);
+        //   request->send(200);
+        // }
+        // else
+        // {
+        //   request->send(500, "text"
+        //                      "Scale not ready or connected!");
+        // }
+      });
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+              AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
+              response->addHeader(F("Cache-Control"), "no-store,max-age=0");
+              // Gzip content
+              response->addHeader(F("Content-Encoding"), "gzip");
+              request->send(response);
+            });
+  server.begin();
 }

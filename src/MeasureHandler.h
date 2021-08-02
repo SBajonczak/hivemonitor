@@ -5,6 +5,7 @@
 #define MeasureHandler_h
 
 #include <Homie.h>
+#include "ConfigurationManager.h"
 
 //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
 #define ARDUINOJSON_USE_DOUBLE 0
@@ -17,7 +18,7 @@ public:
   void setupHandler();
   void AdvertiseNodes();
   
-  MeasureHandler();
+  MeasureHandler(ConfigurationManager *configurationManager);
 
   void SetWeightValue(float weightValue);
   void SetTemperatureValue(int index, float temperature);
@@ -30,6 +31,7 @@ public:
   bool GetLowBattery();
 
 private:
+  ConfigurationManager *configurationManager;
   int id;
   float weight;
   float voltage;

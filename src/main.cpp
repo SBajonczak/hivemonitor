@@ -10,7 +10,6 @@
 
 #define FW_NAME "Development"
 #define FW_VERSION "0.10.0"
-
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
 const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x48\xd4\x1a";
 
@@ -34,15 +33,12 @@ extern "C"
 int runtime_s = 0;
 Ticker timeout;
 
-// Get weight
-WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+ConfigurationManager configurationManager;
 TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
-MeasureHandler measures;
+MeasureHandler measures(&configurationManager);
 DeviceManager devicemanager;
-ConfigurationManager configurationManager;
 
-TareUtility procs(&scaledevice);
 
 void setupHandler()
 {
@@ -91,17 +87,7 @@ void onHomieEvent(const HomieEvent &event)
       Homie.getLogger() << "DEBUG: No Temperature sensors attached!" << endl;
     }
 
-    if (scaledevice.DeviceReady())
-    {
-      Homie.getLogger() << "DEBUG: Try to get scale value!" << endl;
-      float weight = scaledevice.getWeight(measures.GetTemperaturValue(1));
-      measures.SetWeightValue(weight);
-      Homie.getLogger() << "DEBUG: Got Scale value: " << weight << endl;
-    }
-    else
-    {
-      Homie.getLogger() << "DEBUG: Scale not ready or disconnected!" << endl;
-    }
+   
 
     measures.SetVoltage(batteryProcessor.getVolt());
     break;
@@ -147,10 +133,19 @@ void loopHandler()
 
 void setup()
 {
+
+  Serial.begin(115200);
+  if (devicemanager.GetOperatingState() == OperatingStates::Maintenance)
+  {
+    //    Homie.getLogger() << "INFO: Device in Maintenance. Go to sleep" << endl;
+    devicemanager.ServeWebui();
+    //    devicemanager.GotToSleep();
+    return;
+  }
+
   Homie.disableResetTrigger();
   Homie.disableLedFeedback(); // collides with Serial on ESP07
   WiFi.forceSleepBegin();     // send wifi directly to sleep to reduce power consumption
-  Serial.begin(115200);
   Homie.getLogger() << endl;
   Homie.getLogger() << "///////////////////////////////////////////" << endl;
   Homie.getLogger() << "GPIO_MAINTENANCE_PIN: " << GPIO_MAINTENANCE_PIN << endl;
@@ -161,12 +156,6 @@ void setup()
   Homie.getLogger() << "FW_VERSION: " << FW_VERSION << endl;
   Homie.getLogger() << "Setup Maintenance pin: " << GPIO_MAINTENANCE_PIN << endl;
   Homie.getLogger() << "///////////////////////////////////////////" << endl;
-  if (devicemanager.GetOperatingState() == OperatingStates::Maintenance)
-  {
-    Homie.getLogger() << "INFO: Device in Maintenance. Go to sleep" << endl;
-    devicemanager.GotToSleep();
-    return;
-  }
 
   Homie.getLogger() << "INFO: Device in normal mode." << endl;
 
@@ -199,11 +188,7 @@ void setup()
     configurationManager.setup();
 
     temperatures.setup();
-    scaledevice.setup(
-        configurationManager.GetKilogramDivider(),
-        configurationManager.GetWeightOffset(),
-        configurationManager.GetCalibrationTemperatureSetting(),
-        configurationManager.GetCalibrationFactorSetting());
+  
 
     Homie.getLogger() << "DEBUG: Turn on WIFI: " << millis() / 1000 << endl;
     WiFi.forceSleepWake();
@@ -220,5 +205,8 @@ void setup()
 
 void loop()
 {
-  Homie.loop();
+  if (!devicemanager.GetOperatingState() == OperatingStates::Maintenance)
+  {
+    Homie.loop();
+  }
 }

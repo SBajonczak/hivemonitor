@@ -5,6 +5,7 @@
 #define DeviceManager_h
 
 #include <Homie.h>
+#include "WeightProcessor.h"
 
 // The Memmory Adress for the state
 #define RTC_STATE 66
@@ -48,6 +49,8 @@ public:
   byte GetCurrentState();
   // Get the actual Operating State
   OperatingStates GetOperatingState();
+  // Serves the Webui for configuration purpose
+  void ServeWebui();
 
 private:
   OperatingStates operatingState;
