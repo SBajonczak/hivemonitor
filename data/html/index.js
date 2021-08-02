@@ -11,25 +11,112 @@ var cfg = {
 
 var d = document;
 function onLoad() {
+    hideAllControls();
+    parseQuery();
+    setBreadCrumb();
     document.getElementById("cv").hidden = true;
+    setInitialPage();
 }
 
+
+function setInitialPage() {
+    switch (ActualPage) {
+        case "INDEX":
+            toggleIndex();
+            break;
+        case "TARE":
+            toogleAutoTare();
+            break;
+        case "TARE1":
+            setDisplay("cTareStep1", "block");
+            break;
+        case "TARE2":
+            setDisplay("cTareStep2", "block");
+            break;
+    }
+}
+function parseQuery() {
+    var param = new URLSearchParams(document.location.search);
+    ActualPage = param.get('page');
+    if (ActualPage == null) {
+        ActualPage = "INDEX";
+    }
+}
+
+function toggleIndex() {
+    hideAllControls();
+    setDisplay("welcome", "block");
+    setDisplay("btnbar", "block");
+
+
+}
+
+function hideAllControls() {
+    setDisplay("cTareStep0", "none");
+    setDisplay("cTareStep1", "none");
+    setDisplay("cTareStep2", "none");
+    setDisplay("welcome", "none");
+    setDisplay("btnbar", "none");
+
+
+
+
+}
+function setDisplay(control, state) {
+    var ct = document.getElementById(control);
+    ct.style.display = state;
+}
 function toogleAutoTare() {
     ActualPage = "TARE";
-    var ct = document.getElementById("ct");
-
+    hideAllControls();
+    setDisplay("cTareStep0", "block");
 }
 
-function sendData(data) {
-    var req = new XMLHttpRequest();
-    req.addEventListener('load', function () { showToastMessage(this.responseText) });
-    req.addEventListener('error', function (e) { showToastMessage(e.stack, true); });
-    req.open("POST", "/upload");
-    var formData = new FormData();
-    formData.append("data", fO.files[0], name);
-    req.send(formData);
-    fO.value = '';
-    return false;
+function setControls() {
+    hideAllControls();
+    setBreadCrumb();
+    setInitialPage();
+
+}
+function setBreadCrumb() {
+    var pl = document.getElementById("pl");
+    switch (ActualPage) {
+        case "INDEX":
+            pl.innerText = "Start";
+            break;
+        case "TARE":
+        case "TARE1":
+        case "TARE2":
+            pl.innerText = "Tare Scale";
+            break;
+    }
+
+
+}
+function tareStep2() {
+    sendData({}, "tarestep1").then((data) => {
+        ActualPage = "TARE2";
+        setControls();
+    }).catch(()=>{});
+}
+
+function startTare() {
+    sendData({}, "tarestep0").then((data) => {
+        ActualPage = "TARE1";
+        setControls();
+    }).catch(()=>{});
+}
+
+function sendData(json, uri) {
+    var prom = new Promise((resolve, reject) => {
+        var req = new XMLHttpRequest();
+        req.addEventListener('load', function () { showToastMessage("OK!"); resolve(this.responseText); });
+        req.addEventListener('error', function (e) { showToastMessage(e.stack, true); reject(); });
+        req.open("POST", uri);
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.send(JSON.stringify(json));
+    })
+    return prom;
 }
 
 

@@ -1,35 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-	<meta charset="utf-8">
-	<meta name="theme-color" content="#222222">
-	<meta content="yes" name="apple-mobile-web-app-capable">
-	<title>Hive-Monitor</title>
-	<script src="index.js"></script>
-	<script>function feedback(){}</script>
-	<style>
-		@import url("index.css");
-	</style>
+
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+		<meta charset="utf-8">
+		<meta name="theme-color" content="#222222">
+		<meta content="yes" name="apple-mobile-web-app-capable">
+		<title>Hive-Monitor</title>
+		<script src="index.js"></script>
+		<script>function feedback() { }</script>
+		<style>
+			@import url("index.css");
+		</style>
 	</head>
-<body onload="onLoad()">
 
-<div id="cv" class="overlay">Load Hive Monitor UI...</div>
-<noscript><div class="overlay" style="opacity:1;">Sorry, Hive Monitor needs JavaScript!</div></noscript>
-<div id="bg"></div>
+	<body onload="onLoad()">
 
-<div class="wrapper" id="top">
-
-	<div class="tab top">
-		<div class="btnwrap">
-			<button id="btnTare" onclick="toogleAutoTare()"><p class="tab-label">Initial weight Tare</p></button>
+		<div id="cv" class="overlay">Load Hive Monitor UI...</div>
+		<noscript>
+			<div class="overlay" style="opacity:1;">Sorry, Hive Monitor needs JavaScript!</div>
+		</noscript>
+		<div id="bg"></div>
+		<div class="container" id="welcome" style="font-weight:bold">
+			<p>Thank you for installing the Hivemonitor Software. 👍</p>
+			<p>You have enabled the Settings Mode. In this Webinterface you will be able to set your configs.</p>
 		</div>
-    </div>
-</div>
 
-<div>
-	<div id="ct"></div>
-</div>
-<div id="connind"></div>
-<div id="toast"></div>
+
+		<div class="container" style="font-weight:bolder">
+			<p>You are here 👉 <span id="pl" /></p>
+		</div>
+
+		<div class="wrapper" id="top">
+			<div style="flex: grid;">
+				<div class="btnwrap" id="btnbar">
+					<button id="btnTare" onclick="toogleAutoTare()">
+						<p class="tab-label">Tare Scale</p>
+					</button>
+				</div>
+			</div>
+		</div>
+
+
+		<div id="cTareStep0" style="display: none;">
+			<div class="container" style="font-weight:bold">
+				<p>Let's start to Tare your scale.
+					Please get a weight of 1 (one) Kilogram, because this will be needed in the Tare steps.
+				</p>
+				<p>Remove all weight from the scale and click "Start".</p>
+				<button id="btnTare" onclick="toggleIndex()">
+					<p class="tab-label">Go Back</p>
+				</button>
+
+				<button id="btnTare" onclick="startTare()">
+					<p class="tab-label">Start</p>
+				</button>
+			</div>
+		</div>
+
+		<div id="cTareStep1" style="display: none;">
+			<div class="container" style="font-weight:bold">
+				<p>Place a weight of 1 (one) Kilogram on the scale.</p>
+				<button id="btnTare" onclick="tareStep2()">
+					<p class="tab-label">Next Step</p>
+				</button>
+			</div>
+		</div>
+
+		<div id="cTareStep2" style="display: none;">
+			<div class="container" style="font-weight:bold">
+				<p>Congratulations! The Scale is now ready to use.</p>
+				<button id="btnTare" onclick="toggleIndex()">
+					<p class="tab-label">Go Back</p>
+				</button>
+			</div>
+		</div>
+
+		<div id="connind"></div>
+		<div id="toast"></div>
+
 </html>
