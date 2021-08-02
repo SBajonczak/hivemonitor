@@ -5,6 +5,8 @@
 #include "WeightProcessor.h"
 #include "HX711.h"
 #include <RunningMedian.h>
+// Avoiding compile issues
+WeightProcessor* WeightProcessor::instance = nullptr;
 
 int _dtPin;
 int _scPin;
@@ -50,9 +52,13 @@ float WeightProcessor::getWeight()
   return weight;
 }
 
+WeightProcessor::~WeightProcessor()
+{
+}
+
 bool WeightProcessor::DeviceReady()
 {
-  return scale.wait_ready_timeout(500);
+  return scale.wait_ready_timeout(200);
 }
 
 float WeightProcessor::getWeight(float temperatureForCompensation)
@@ -75,4 +81,3 @@ float WeightProcessor::toKilogram(float getWeighMeasure)
 {
   return getWeighMeasure / 1000;
 }
-
