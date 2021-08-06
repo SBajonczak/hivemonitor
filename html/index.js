@@ -1,14 +1,5 @@
 var ActualPage = "INDEX";
 
-var cfg = {
-    theme: { base: "dark", bg: { url: "" }, alpha: { bg: 0.6, tab: 0.8 }, color: { bg: "" } },
-    comp: {
-        colors: { picker: true, rgb: false, quick: true, hex: false },
-        labels: true, pcmbot: false, pid: true, seglen: false, css: true, hdays: false
-    }
-};
-
-
 var d = document;
 function onLoad() {
     hideAllControls();
@@ -17,10 +8,11 @@ function onLoad() {
     setInitialPage();
     setDisplay("cv", "none");
     GetSettings();
-
 }
+
 function GetSettings() {
     read("settings").then((data) => {
+        console.debug(data);
         setTextBoxValue("system_sleeptime", data.system.sleeptime);
         setTextBoxValue("system_vccadjustsetting", data.system.vccadjustsetting);
 
@@ -151,8 +143,9 @@ function read(uri) {
         req.addEventListener('error', function (e) { showToastMessage("Error while getting Data ", true); reject(); });
         req.open("GET", uri);
         req.onload = function (data) {
-            resolve(data);
+            resolve(JSON.parse(req.response));
         }
+        req.send();
     })
     return prom;
 }
