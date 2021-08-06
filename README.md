@@ -204,7 +204,15 @@ The following table will give you more insights about the settings.
 |mqtt|password|The password when authentication is configured.|
 
 
-## Upload_Configuration
+## Modify Configuration
+When you activated the maintenance mode, you will be able to connect to the device. 
+Since you have been connected, you can navigate to the device IP an it will show you the configuration Interface. 
+
+![image](https://user-images.githubusercontent.com/18240989/128514097-10bd2ed1-f1f3-416f-a3c6-4e475e7a31b6.png)
+
+
+
+## Upload Predefined Configuration
 After you modified the configuration to your setting, you can upload this to your device.
 ```bash
  make upload-config
