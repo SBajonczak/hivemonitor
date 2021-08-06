@@ -15,9 +15,9 @@ HomieNode Nodebattery("battery", "volt", "switch");
 HomieNode NodebatAlarm("battery", "alarm", "switch");
 HomieNode Nodejson("data", "__json__", "switch"); //Hiveeyes.org compatibility format
 
-MeasureHandler::MeasureHandler(ConfigurationManager *configurationManager)
+MeasureHandler::MeasureHandler()
 {
-  this->configurationManager = configurationManager;
+  this->configurationManager = ConfigurationManager::getInstance();
   this->configurationManager->setup();
 }
 
