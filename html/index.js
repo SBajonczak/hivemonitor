@@ -24,7 +24,7 @@ function GetSettings() {
         setTextBoxValue("scale_weightoffset", data.scale.weightoffset);
         setTextBoxValue("scale_kilogramdivider", data.scale.kilogramdivider);
         setTextBoxValue("scale_calibrationtemperaturesetting", data.scale.calibrationtemperaturesetting);
-        setTextBoxValue("scale_calibrationfactorsetting", data.scale.calibrationfactorSetting);
+        setTextBoxValue("scale_calibrationfactorsetting", data.scale.calibrationfactorsetting);
 
         setTextBoxValue("wireles_password", data.wireles.password);
         setTextBoxValue("wireles_ssid", data.wireles.ssid);
@@ -195,7 +195,7 @@ function saveSettings() {
             weightoffset: getTextBoxNumberValue('scale_weightoffset'),
             kilogramdivider: getTextBoxNumberValue('scale_kilogramdivider'),
             calibrationtemperaturesetting: getTextBoxNumberValue('scale_calibrationtemperaturesetting'),
-            calibrationfactorSetting: getTextBoxNumberValue('scale_calibrationfactorsetting')
+            calibrationfactorsetting: getTextBoxNumberValue('scale_calibrationfactorsetting')
         },
         wireles: {
             password: getTextBoxValue('wireles_password'),
