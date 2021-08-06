@@ -18,7 +18,7 @@ public:
   void setupHandler();
   void AdvertiseNodes();
   
-  MeasureHandler(ConfigurationManager *configurationManager);
+  MeasureHandler();
 
   void SetWeightValue(float weightValue);
   void SetTemperatureValue(int index, float temperature);

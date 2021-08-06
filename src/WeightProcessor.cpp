@@ -6,7 +6,7 @@
 #include "HX711.h"
 #include <RunningMedian.h>
 // Avoiding compile issues
-WeightProcessor* WeightProcessor::instance = nullptr;
+WeightProcessor *WeightProcessor::instance = nullptr;
 
 int _dtPin;
 int _scPin;
@@ -34,22 +34,21 @@ void WeightProcessor::setup(float kilogramDivider, float weightOffset, float cal
 
 float WeightProcessor::getWeight()
 {
+
   RunningMedian WeightSamples = RunningMedian(3);
   scale.power_up();
-  delay(100);
   scale.set_scale(this->_kilogramDivider); //initialize scale
   scale.set_offset(this->_weightOffset);   //initialize scale
   for (int i = 0; i < 3; i++)
   {
     float WeightRaw = scale.get_units(3);
     WeightSamples.add(WeightRaw);
-    delay(500);
-    yield();
   }
   scale.power_down();
-
-  float weight = WeightSamples.getMedian();
-  return weight;
+  float median = WeightSamples.getMedian();
+  Serial.print("Median:");
+  Serial.println(median);
+  return median;
 }
 
 WeightProcessor::~WeightProcessor()
@@ -63,18 +62,18 @@ bool WeightProcessor::DeviceReady()
 
 float WeightProcessor::getWeight(float temperatureForCompensation)
 {
-  if (scale.is_ready())
-  {
-    float weight = this->getWeight();
-    //temperature compensation
-    if (temperatureForCompensation < this->_calibrationTemperature)
-      weight = weight + (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
-    if (temperatureForCompensation > this->_calibrationTemperature)
-      weight = weight - (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
+  // if (scale.is_ready())
+  // {
+  float weight = this->getWeight();
+  //temperature compensation
+  if (temperatureForCompensation < this->_calibrationTemperature)
+    weight = weight + (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
+  if (temperatureForCompensation > this->_calibrationTemperature)
+    weight = weight - (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
 
-    return weight;
-  }
-  return 0;
+  return weight;
+  // }
+  // return 0;
 }
 
 float WeightProcessor::toKilogram(float getWeighMeasure)
