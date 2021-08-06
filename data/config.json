@@ -1,0 +1,22 @@
+{
+    "system": {
+        "sleeptime": 20,
+        "vccadjustsetting": 0
+    },
+    "mqtt": {
+        "server": "192.168.178.201",
+        "port": 1886,
+        "user": "ulf",
+        "password": "hermes"
+    },
+    "scale":{
+        "weightoffset":0,
+        "kilogramdivider":0, 
+        "calibrationtemperaturesetting":0,
+        "calibrationfactorSetting":0
+    },
+    "wireles": {
+        "password": "password",
+        "ssid": "myssid"
+    }
+}
