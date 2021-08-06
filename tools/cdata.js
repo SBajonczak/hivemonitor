@@ -186,10 +186,10 @@
    fs.writeFileSync(resultFile, src);
  }
  
-writeHtmlGzipped("data/html/index.htm", "src/html/html_ui.h");
+writeHtmlGzipped("html/index.htm", "src/html/html_ui.h");
  
  writeChunks(
-   "data/html",
+   "html",
    [
      {
        file: "style.css",
@@ -233,22 +233,3 @@ writeHtmlGzipped("data/html/index.htm", "src/html/html_ui.h");
    "src/html/html_settings.h"
  );
  
-//  writeChunks(
-//    "data/html",
-//    [
-//      {
-//        file: "404.htm",
-//        name: "PAGE_404",
-//        prepend: "=====(",
-//        append: ")=====",
-//        method: "plaintext",
-//        filter: "html-minify",
-//      },
-//      {
-//        file: "favicon.ico",
-//        name: "favicon",
-//        method: "binary",
-//      },
-//    ],
-//    "html_other.h"
-//  );
