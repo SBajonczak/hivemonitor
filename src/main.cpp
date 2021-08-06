@@ -5,8 +5,9 @@
 #include "BatteryProcessor.h"
 #include "MeasureHandler.h"
 #include "DeviceManager.h"
-#include "ConfigurationManager.h"
+// #include "ConfigurationManager.h"
 #include "TareUtility.h"
+#include "ConfigWebserver.h"
 
 #define FW_NAME "Development"
 #define FW_VERSION "0.10.0"
@@ -33,12 +34,10 @@ extern "C"
 int runtime_s = 0;
 Ticker timeout;
 
-ConfigurationManager configurationManager;
 TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
-MeasureHandler measures(&configurationManager);
+MeasureHandler measures;
 DeviceManager devicemanager;
-
 
 void setupHandler()
 {
@@ -51,7 +50,7 @@ void max_run()
   if (runtime_s == RUNTIME_MAX)
   {
     Homie.getLogger() << "DEBUG: Max. runtime of " << RUNTIME_MAX << "s reached, shutting down!" << endl;
-    devicemanager.SetSleepTime(configurationManager.GetSleepTime());
+    // devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
     // Homie.getLogger() << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
     Homie.prepareToSleep();
   }
@@ -87,8 +86,6 @@ void onHomieEvent(const HomieEvent &event)
       Homie.getLogger() << "DEBUG: No Temperature sensors attached!" << endl;
     }
 
-   
-
     measures.SetVoltage(batteryProcessor.getVolt());
     break;
 
@@ -106,7 +103,7 @@ void onHomieEvent(const HomieEvent &event)
     }
     else
     {
-      devicemanager.SetSleepTime(configurationManager.GetSleepTime());
+      // devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
     }
 
     // Submitting the gathered data now.
@@ -133,18 +130,22 @@ void loopHandler()
 
 void setup()
 {
-
   Serial.begin(115200);
-  if (devicemanager.GetOperatingState() == OperatingStates::Maintenance)
-  {
-    //    Homie.getLogger() << "INFO: Device in Maintenance. Go to sleep" << endl;
-    devicemanager.ServeWebui();
-    //    devicemanager.GotToSleep();
-    return;
-  }
+  // Get the settings
+  ConfigurationManager::getInstance()->ReadSettings();
 
   Homie.disableResetTrigger();
   Homie.disableLedFeedback(); // collides with Serial on ESP07
+
+  switch (devicemanager.GetOperatingState())
+  {
+  case OperatingStates::Maintenance:
+    ConfigWebserver configServer;
+    configServer.Serve();
+    return;
+
+  }
+
   WiFi.forceSleepBegin();     // send wifi directly to sleep to reduce power consumption
   Homie.getLogger() << endl;
   Homie.getLogger() << "///////////////////////////////////////////" << endl;
@@ -185,10 +186,9 @@ void setup()
     break;
   case STATE_CONNECT_WIFI:
     Homie.onEvent(onHomieEvent);
-    configurationManager.setup();
+    // ConfigurationManager::getInstance()->setup();
 
     temperatures.setup();
-  
 
     Homie.getLogger() << "DEBUG: Turn on WIFI: " << millis() / 1000 << endl;
     WiFi.forceSleepWake();
