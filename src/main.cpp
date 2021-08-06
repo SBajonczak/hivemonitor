@@ -143,10 +143,9 @@ void setup()
     ConfigWebserver configServer;
     configServer.Serve();
     return;
-
   }
 
-  WiFi.forceSleepBegin();     // send wifi directly to sleep to reduce power consumption
+  WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
   Homie.getLogger() << endl;
   Homie.getLogger() << "///////////////////////////////////////////" << endl;
   Homie.getLogger() << "GPIO_MAINTENANCE_PIN: " << GPIO_MAINTENANCE_PIN << endl;
@@ -167,8 +166,6 @@ void setup()
     devicemanager.SetStateToMemory(STATE_COLDSTART);
   }
   devicemanager.ReadStateFromMemory();
-  // // now the restart cause is clear, handle the different states
-  Serial.printf("State: %d\r\n", devicemanager.GetCurrentState());
   switch (devicemanager.GetCurrentState())
   {
   default: // Catch all unknown states
@@ -186,7 +183,6 @@ void setup()
     break;
   case STATE_CONNECT_WIFI:
     Homie.onEvent(onHomieEvent);
-    // ConfigurationManager::getInstance()->setup();
 
     temperatures.setup();
 
