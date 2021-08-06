@@ -160,56 +160,52 @@ The Configuration is done with an json file. An example of it looks like this:
 
 ```json
 {
-	"wifi":	{
-		"ssid": "SSID",
-		"password": "mysecret"
-	},
-	"mqtt":	{
-		"host": "192.168.178.55",
-		"port": 1886,
-		"base_topic": "",
-		"auth": true,
-		"username": "username",
-		"password": "password"
-	},
-	"name":"hive-teststand",
-	"ota": {
-		"enabled":false
-	},
-	"device_id":"hive-teststand",
-	"settings": {
-		"sleepTime": 3600,
-    	"sendInterval": 320,
-        "weightOffset": 244017.00,
-        "kilogramDivider": 22.27
-  	}
+    "system": {
+        "sleeptime": 2,
+        "vccadjustsetting": 0
+    },
+    "scale": {
+        "weightoffset": 0,
+        "kilogramdivider": 0,
+        "calibrationtemperaturesetting": 0,
+        "calibrationfactorsetting": 0
+    },
+    "wifi": {
+        "ssid": "",
+        "password": "33"
+    },
+    "mqtt": {
+        "server": "kjkhj",
+        "port": 0,
+        "user": "null",
+        "password": "null"
+    }
+
 }
+
+You can set and read the configuration when you use the maintenance mode.
+
 ```
 The following table will give you more insights about the settings.
 
-
-|Setting|Description|
-|-|-|
-|wifi.sid|the wifis name.|
-|wifi.password|The password for the wifi|
-|mqtt.host|The host for the mqtt. This can be a dns name or a ip address.|
-|mqtt.port|The Mqtt Port.|
-|mqtt.base_topic|If there is a prefix required for a topic, then you can set here the basetopic.|
-|mqtt.auth|__true__ when using authentication, or __false__ when not using it|
-|mqtt.username|The username when authentication is configured.|
-|mqtt.password|The password when authentication is configured.|
-|name|This is the device name. This will shown up in the router later|
-|ota.enabled|__true__ to enable _o_ver _t_he _a_ir update.|
-|device_id|The device ID, possible the same as name.|
-|settings.sleepTime|The Sleepingtime in seconds|
-|settings.sendInterval|The intervall to send, the sleep time will be different. When you have a send intervall from 60 seconds and a weight intervall of 90 seconds it will take 2 rounds of wake up|
-|settings.weightOffset|The weight offset. This is neccessary for the adjustment of the weightcell. Because there are some base weights.|
-|settings.kilogramDivider|The divider to get the kilograms.|
+|Group|Setting|Description|
+|-|-|-|
+|system|sleeptime|The Sleepingtime in seconds|
+|system|vccadjustsetting|This setting adjusting the battery monitor.|
+|wireles|ssid|The wifi SSID.|
+|wireles|password|The password to authenticate.|
+|scale|weightoffset|This is the offset to Tare the 0 value. When no weight is placed.|
+|scale|kilogramdivider|This is the Raw value, to divide the kilogram value out.|
+|scale|calibrationtemperaturesetting|This is the measured temperatur when the intial adjust was done. This will later be used, to compensate the weight differences due to the temparture.|
+|scale|calibrationfactorsetting|This will be the calibarion factor. Calculated ba the autotare function.|
+|mqtt|server|The host for the mqtt. This can be a dns name or a ip address.|
+|mqtt|port|The Mqtt Port.|
+|mqtt|user|The username when authentication is configured.|
+|mqtt|password|The password when authentication is configured.|
 
 
 ## Upload_Configuration
 After you modified the configuration to your setting, you can upload this to your device.
-
 ```bash
  make upload-config
 ```

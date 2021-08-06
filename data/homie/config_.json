@@ -1,14 +1,14 @@
 {
     "wifi": {
         "ssid": "Ponyhof",
-        "password": "Tumalonga2411"
+        "password": ""
     },
     "mqtt": {
         "host": "192.168.178.201",
         "port": 1886,
         "auth": true,
         "username": "sascha",
-        "password": "tumalonga2411"
+        "password": ""
     },
     "name": "dev-device",
     "ota": {
