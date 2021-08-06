@@ -222,3 +222,13 @@ For future Releases I planning to improve some thing and extend it with the foll
 
 
 Feel free to suggest me more Features.
+
+# FAQ
+
+# My device does not start the AP mode
+In this case you must erase the complete flash memmory of your device. 
+You can do it in platform io with: 
+
+```
+pio run --target erase 
+```

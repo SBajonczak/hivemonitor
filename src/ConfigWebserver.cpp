@@ -31,14 +31,16 @@ ConfigWebserver::~ConfigWebserver() {}
 
 void ConfigWebserver::Serve()
 {
+  const IPAddress apIP = IPAddress(192, 168, 4, 1);
+  static const byte DNS_PORT = 53;
+  DNSServer dnsServer;
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(AP_SSIDNAME, AP_PASSWORD);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED)
-  {
-    Serial.printf("WiFi Failed!\n");
-    return;
-  }
+  dnsServer.start(DNS_PORT, "*", apIP);
+
   Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.softAPIP());
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");

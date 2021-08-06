@@ -134,8 +134,8 @@ void setup()
   // Get the settings
   ConfigurationManager::getInstance()->ReadSettings();
 
-  Homie.disableResetTrigger();
-  Homie.disableLedFeedback(); // collides with Serial on ESP07
+  // Homie.disableResetTrigger();
+  // Homie.disableLedFeedback(); // collides with Serial on ESP07
 
   switch (devicemanager.GetOperatingState())
   {
