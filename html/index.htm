@@ -13,7 +13,7 @@
 		</style>
 	</head>
 
-	<body onload="" style="background-color: #D9D4C1">
+	<body onload="onLoad()" style="background-color: #D9D4C1">
 		<div class="container mx-auto px-6 py-8">
 			<div class="grid grid-cols-1">
 				<div id="cv" style="display: none;" class="overlay">Load Hive Monitor UI...</div>
@@ -113,8 +113,10 @@
 					</button>
 					<span
 						class="bg-yellow-300 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">MQTT</span>
-					<span class="font-bold text-md m-1">Server</span><input class="p-1 font-bold m-1 border rounded-lg"
-						id="mqtt_server">
+					<div>
+						<span class="font-bold text-md m-1">Server</span></p>
+						<span class="m-1">Servername or IP</span>
+					</div><input class="p-1 font-bold m-1 border rounded-lg" id="mqtt_server">
 					<span class="font-bold text-md m-1">User</span><input class="p-1 font-bold m-1 border rounded-lg"
 						id="mqtt_user">
 					<span class="font-bold text-md m-1">Password</span><input
@@ -136,9 +138,6 @@
 					<p id="toastErrorText">A simple alert with text and a right icon</p>
 					<span class="absolute inset-y-0 right-0 flex items-center mr-4">
 						<svg class="w-4 h-4 fill-current" role="button" viewBox="0 0 20 20">
-							<path
-								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-								clip-rule="evenodd" fill-rule="evenodd"></path>
 						</svg>
 					</span>
 				</div>
@@ -148,9 +147,7 @@
 					<p id="toastSuccessText"></p>
 					<span class="absolute inset-y-0 right-0 flex items-center mr-4">
 						<svg class="w-4 h-4 fill-current" role="button" viewBox="0 0 20 20">
-							<path
-								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-								clip-rule="evenodd" fill-rule="evenodd"></path>
+
 						</svg>
 					</span>
 				</div>
@@ -158,11 +155,6 @@
 
 			</div>
 		</div>
-		<script>
-			(function () {
-				onLoad();
-			})();
-		</script>
 	</body>
 
 </html>
