@@ -143,7 +143,7 @@ function read(uri) {
         req.addEventListener('error', function (e) { showToastMessage("Error while getting Data ", true); reject(); });
         req.open("GET", uri);
         req.onload = function (data) {
-            resolve(JSON.parse(req.response));
+            resolve(JSON.parse(req.responseText));
         }
         req.send();
     })
