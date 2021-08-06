@@ -49,8 +49,7 @@ public:
   byte GetCurrentState();
   // Get the actual Operating State
   OperatingStates GetOperatingState();
-  // Serves the Webui for configuration purpose
-  void ServeWebui();
+
 
 private:
   OperatingStates operatingState;
