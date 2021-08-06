@@ -105,7 +105,6 @@ DynamicJsonDocument ConfigurationManager::GetJsonDocument()
 void ConfigurationManager::ApplyJsonInput(String json)
 {
   DynamicJsonDocument jData(2048);
-  Serial.println(json);
   deserializeJson(jData, json);
 
   this->WeightOffset = jData["scale"]["weightoffset"];
@@ -123,19 +122,6 @@ void ConfigurationManager::ApplyJsonInput(String json)
 
   this->WifiSsid = jData["wireles"]["ssid"].as<String>();
   this->WifiPassword = jData["wireles"]["password"].as<String>();
-
-
-  if (jData.isNull())
-  {
-
-  }
-
-  // else
-  // {
-  //   Serial.println("is null");
-  // }
-  // this->WifiPassword = jData["wireles"]["password"].as<String>();
-  // this->WifiSsid = jData["wireles"]["ssid"].as<String>();
 }
 
 void ConfigurationManager::StoreSettings()
@@ -147,8 +133,6 @@ void ConfigurationManager::StoreSettings()
     File configFile = SPIFFS.open(CONFIG_FILE, "w");
     if (configFile)
     {
-      Serial.println("Saving content: ");
-      Serial.println(json);
       configFile.println(json);
       configFile.close();
     }
@@ -166,10 +150,8 @@ void ConfigurationManager::ReadSettings()
       File configFile = SPIFFS.open(CONFIG_FILE, "r");
       if (configFile)
       {
-        Serial.print("Read content:");
         String s = configFile.readString();
         this->ApplyJsonInput(s);
-        Serial.println("Done!✔");
         return;
       }
     }
