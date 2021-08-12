@@ -1,10 +1,7 @@
 #include <DeviceManager.h>
 
-
-
 #include "TareUtility.h"
 #include "ConfigurationManager.h"
-
 
 void DeviceManager::setup() {}
 
@@ -87,7 +84,19 @@ byte DeviceManager::GetCurrentState()
 {
   return this->CurrentState;
 }
+void DeviceManager::ConnectWifi()
+{
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ConfigurationManager::getInstance()->GetWifiSsid(),
+             ConfigurationManager::getInstance()->GetWifiPassword());
 
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected");
+}
 OperatingStates DeviceManager::GetOperatingState()
 {
   int result = digitalRead(GPIO_MAINTENANCE_PIN);

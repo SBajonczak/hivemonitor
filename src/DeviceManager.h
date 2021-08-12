@@ -49,7 +49,7 @@ public:
   byte GetCurrentState();
   // Get the actual Operating State
   OperatingStates GetOperatingState();
-
+  void ConnectWifi();
 
 private:
   OperatingStates operatingState;

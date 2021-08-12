@@ -1,19 +1,23 @@
 #ifndef MqttWrapper_H
 #define MqttWrapper_H
 #include <AsyncMqttClient.h>
+#include "message.h"
 
 class MqttWrapper
 {
 
-  const int delayBetweenSamplesInSeconds = 3;
-  const int amountWeightSamples = 10;
-
 public:
-  MqttWrapper(char *Topic);
+  MqttWrapper();
   ~MqttWrapper();
-  uint16_t Send(char *message);
+  void onMqttConnect();
+  void Queue(char* Topic, char* msg);
+  void Send();
+  void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 private:
-  char *Topic;
+  char* message;
+  char* Topic;
+  bool connected;
+    static std::vector<Message*> messages;
 };
 
 #endif

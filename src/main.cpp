@@ -8,6 +8,7 @@
 // #include "ConfigurationManager.h"
 #include "TareUtility.h"
 #include "ConfigWebserver.h"
+#include "MqttWrapper.h"
 
 #define FW_NAME "Development"
 #define FW_VERSION "0.10.0"
@@ -38,6 +39,7 @@ TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
 MeasureHandler measures;
 DeviceManager devicemanager;
+ConfigWebserver configServer;
 
 void setupHandler()
 {
@@ -140,11 +142,20 @@ void setup()
   switch (devicemanager.GetOperatingState())
   {
   case OperatingStates::Maintenance:
-    ConfigWebserver configServer;
+    Serial.println("Maintenance mode");
     configServer.Serve();
     return;
+    break;
+  case OperatingStates::Operating:
+    Serial.println("Normal mode");
+    break;
   }
 
+  devicemanager.ConnectWifi();
+  MqttWrapper mqtt;
+  mqtt.Queue("/homie/msg", "{'a':122,'b':333}");
+  mqtt.Send();
+  
   WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
   Homie.getLogger() << endl;
   Homie.getLogger() << "///////////////////////////////////////////" << endl;
@@ -157,46 +168,46 @@ void setup()
   Homie.getLogger() << "Setup Maintenance pin: " << GPIO_MAINTENANCE_PIN << endl;
   Homie.getLogger() << "///////////////////////////////////////////" << endl;
 
-  Homie.getLogger() << "INFO: Device in normal mode." << endl;
+  // Homie.getLogger() << "INFO: Device in normal mode." << endl;
 
-  if (devicemanager.IsColdstart())
-  {
-    Homie.getLogger() << "DEBUG: Is Coldstart set new initial State" << endl;
-    devicemanager.SetStateAndMagicNumberToMemory();
-    devicemanager.SetStateToMemory(STATE_COLDSTART);
-  }
-  devicemanager.ReadStateFromMemory();
-  switch (devicemanager.GetCurrentState())
-  {
-  default: // Catch all unknown states
-  case STATE_SLEEP_WAKE:
-    // first run after power on - initializes
-  case STATE_COLDSTART:
-    // Prepare to setup the WIFI
+  // if (devicemanager.IsColdstart())
+  // {
+  //   Homie.getLogger() << "DEBUG: Is Coldstart set new initial State" << endl;
+  //   devicemanager.SetStateAndMagicNumberToMemory();
+  //   devicemanager.SetStateToMemory(STATE_COLDSTART);
+  // }
+  // devicemanager.ReadStateFromMemory();
+  // switch (devicemanager.GetCurrentState())
+  // {
+  // default: // Catch all unknown states
+  // case STATE_SLEEP_WAKE:
+  //   // first run after power on - initializes
+  // case STATE_COLDSTART:
+  //   // Prepare to setup the WIFI
 
-    WiFi.forceSleepWake();
-    WiFi.mode(WIFI_STA);
-    // one more sleep required to to wake with wifi on
-    devicemanager.SetStateToMemory(STATE_CONNECT_WIFI);
-    devicemanager.GotToSleep(WAKE_RFCAL);
+  //   WiFi.forceSleepWake();
+  //   WiFi.mode(WIFI_STA);
+  //   // one more sleep required to to wake with wifi on
+  //   devicemanager.SetStateToMemory(STATE_CONNECT_WIFI);
+  //   devicemanager.GotToSleep(WAKE_RFCAL);
 
-    break;
-  case STATE_CONNECT_WIFI:
-    Homie.onEvent(onHomieEvent);
+  //   break;
+  // case STATE_CONNECT_WIFI:
+  //   Homie.onEvent(onHomieEvent);
 
-    temperatures.setup();
+  //   temperatures.setup();
 
-    Homie.getLogger() << "DEBUG: Turn on WIFI: " << millis() / 1000 << endl;
-    WiFi.forceSleepWake();
-    delay(500);
-    wifi_set_sleep_type(MODEM_SLEEP_T);
-    Homie_setFirmware(FW_NAME, FW_VERSION);
-    Homie.setSetupFunction(setupHandler).setLoopFunction(loopHandler);
-    measures.AdvertiseNodes();
-    Homie.getLogger() << "DEBUG: Before setup(): " << millis() / 1000 << endl;
-    Homie.setup();
-    break;
-  }
+  //   Homie.getLogger() << "DEBUG: Turn on WIFI: " << millis() / 1000 << endl;
+  //   WiFi.forceSleepWake();
+  //   delay(500);
+  //   wifi_set_sleep_type(MODEM_SLEEP_T);
+  //   Homie_setFirmware(FW_NAME, FW_VERSION);
+  //   Homie.setSetupFunction(setupHandler).setLoopFunction(loopHandler);
+  //   measures.AdvertiseNodes();
+  //   Homie.getLogger() << "DEBUG: Before setup(): " << millis() / 1000 << endl;
+  //   Homie.setup();
+  //   break;
+  // }
 }
 
 void loop()
