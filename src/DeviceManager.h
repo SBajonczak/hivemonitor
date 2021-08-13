@@ -50,8 +50,11 @@ public:
   // Get the actual Operating State
   OperatingStates GetOperatingState();
   void ConnectWifi();
+  char *getDeviceID();
 
 private:
+   static char _deviceId[15];
+  void generateDeviceID();
   OperatingStates operatingState;
   int SleepTime;
   byte CurrentState;

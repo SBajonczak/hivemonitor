@@ -158,6 +158,11 @@ void MeasureHandler::SubmitData()
   }
 }
 
+float MeasureHandler::GetWeightValue()
+{
+  return this->weight;
+}
+
 float MeasureHandler::GetVoltage()
 {
   return this->voltage;

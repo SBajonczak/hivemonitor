@@ -1,4 +1,4 @@
-#include <Homie.h>
+// #include <Homie.h>
 #include <Ticker.h>
 #include "WeightProcessor.h"
 #include "TemperatureProcessor.h"
@@ -40,6 +40,7 @@ BatteryProcessor batteryProcessor;
 MeasureHandler measures;
 DeviceManager devicemanager;
 ConfigWebserver configServer;
+MqttWrapper mqtt(devicemanager.getDeviceID());
 
 void setupHandler()
 {
@@ -51,91 +52,20 @@ void max_run()
   ++runtime_s;
   if (runtime_s == RUNTIME_MAX)
   {
-    Homie.getLogger() << "DEBUG: Max. runtime of " << RUNTIME_MAX << "s reached, shutting down!" << endl;
-    // devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
-    // Homie.getLogger() << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
-    Homie.prepareToSleep();
-  }
-}
-
-void onHomieEvent(const HomieEvent &event)
-{
-
-  switch (event.type)
-  {
-  case HomieEventType::STANDALONE_MODE:
-  case HomieEventType::CONFIGURATION_MODE:
-  case HomieEventType::OTA_STARTED:
-  case HomieEventType::OTA_PROGRESS:
-  case HomieEventType::OTA_SUCCESSFUL:
-  case HomieEventType::OTA_FAILED:
-  case HomieEventType::ABOUT_TO_RESET:
-  case HomieEventType::WIFI_CONNECTED:
-  case HomieEventType::MQTT_DISCONNECTED:
-  case HomieEventType::MQTT_PACKET_ACKNOWLEDGED:
-  case HomieEventType::SENDING_STATISTICS:
-    break;
-  case HomieEventType::NORMAL_MODE:
-
-    //timeout.attach(1.0, max_run);
-    if (temperatures.getDeviceCount() > 0)
-    {
-      Homie.getLogger() << "DEBUG: " << temperatures.getDeviceCount() << " Temperature sensors attached" << endl;
-      measures.SetTemperatureValue(0, temperatures.getTemperature(0));
-    }
-    else
-    {
-      Homie.getLogger() << "DEBUG: No Temperature sensors attached!" << endl;
-    }
-
-    measures.SetVoltage(batteryProcessor.getVolt());
-    break;
-
-  case HomieEventType::WIFI_DISCONNECTED:
-    Homie.getLogger() << "Wifi disconnected" << endl;
-    break;
-
-  case HomieEventType::MQTT_READY:
-    measures.SetLowBattery(batteryProcessor.IsLow());
-
-    // When the battery is low, it mus sleep forever
-    if (measures.GetLowBattery())
-    {
-      devicemanager.SetSleepTime(0);
-    }
-    else
-    {
-      // devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
-    }
-
-    // Submitting the gathered data now.
-    measures.SubmitData();
-
-    Homie.getLogger() << "✔ Data is transmitted, waiting for package acks..." << endl;
-    //max_run();
-    delay(100);
-    Homie.prepareToSleep();
-    break;
-
-  case HomieEventType::READY_TO_SLEEP:
-
-    Homie.getLogger() << "DEBUG: Total runtime: " << millis() / 1000 << endl;
+    // Serial.println()  << "DEBUG: Max. runtime of " << RUNTIME_MAX << "s reached, shutting down!" << endl;
+    devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
+    //Serial.println()  << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
     devicemanager.GotToSleep();
-    Homie.getLogger() << "Sleeping now!" << endl;
-    break;
+    // Homie.prepareToSleep();
   }
 }
 
-void loopHandler()
-{
-}
 
 void setup()
 {
   Serial.begin(115200);
   // Get the settings
   ConfigurationManager::getInstance()->ReadSettings();
-
   // Homie.disableResetTrigger();
   // Homie.disableLedFeedback(); // collides with Serial on ESP07
 
@@ -147,73 +77,106 @@ void setup()
     return;
     break;
   case OperatingStates::Operating:
-    Serial.println("Normal mode");
+
+    if (devicemanager.IsColdstart())
+    {
+      // Serial.println()  << "DEBUG: Is Coldstart set new initial State" << endl;
+      devicemanager.SetStateAndMagicNumberToMemory();
+      devicemanager.SetStateToMemory(STATE_COLDSTART);
+    }
+    devicemanager.ReadStateFromMemory();
+    switch (devicemanager.GetCurrentState())
+    {
+    default: // Catch all unknown states
+    case STATE_SLEEP_WAKE:
+      // first run after power on - initializes
+    case STATE_COLDSTART:
+      // Prepare to setup the WIFI
+
+      WiFi.forceSleepWake();
+      WiFi.mode(WIFI_STA);
+      // one more sleep required to to wake with wifi on
+      devicemanager.SetStateToMemory(STATE_CONNECT_WIFI);
+      devicemanager.GotToSleep(WAKE_RFCAL);
+
+      break;
+    case STATE_CONNECT_WIFI:
+      temperatures.setup();
+
+      WiFi.forceSleepWake();
+      delay(500);
+      wifi_set_sleep_type(MODEM_SLEEP_T);
+
+      devicemanager.ConnectWifi();
+      // Measure Battery
+      measures.SetLowBattery(batteryProcessor.IsLow());
+      measures.SetVoltage(batteryProcessor.getVolt());
+
+      // Get temperature
+      if (temperatures.getDeviceCount() > 0)
+      {
+        for (int i = 0; i < temperatures.getDeviceCount(); i++)
+        {
+          char internalTopic[155];
+          strcpy(internalTopic, "/hive/Temperature/");
+          strcat(internalTopic, String(i).c_str());
+          strcat(internalTopic, "/value");
+          mqtt.Queue(internalTopic, measures.GetTemperaturValue(0));
+          measures.SetTemperatureValue(0, temperatures.getTemperature(0));
+        }
+      }
+      else
+      {
+        Serial.println("No Temperature Sensors connected");
+      }
+
+      WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+      if (scaledevice.DeviceReady())
+      {
+        mqtt.Queue("/hive/weight", scaledevice.getWeight());
+      }
+      else
+      {
+        Serial.println("No Scaledevice connected");
+      }
+      mqtt.Queue("/hive/battery/volt", measures.GetVoltage());
+      mqtt.Queue("/hive/battery/islow", measures.GetLowBattery());
+      mqtt.Queue("/hive/weight", measures.GetWeightValue());
+      mqtt.Send();
+
+      // When the battery is low, it mus sleep forever
+      if (measures.GetLowBattery())
+      {
+        devicemanager.SetSleepTime(0);
+      }
+      else
+      {
+        devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
+      }
+
+      WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
+      // Serial.println() << endl;
+      // Serial.println( "///////////////////////////////////////////" << endl;
+      // Serial.println( "GPIO_MAINTENANCE_PIN: " << GPIO_MAINTENANCE_PIN << endl;
+      // Serial.println( "GPIO_ONEWIRE_BUS: " << GPIO_ONEWIRE_BUS << endl;
+      // Serial.println("GPIO_HX711_SCK: " << GPIO_HX711_SCK << endl;
+      // Serial.println( "GPIO_HX711_DT: " << GPIO_HX711_DT << endl;
+      // Serial.println( "FW_NAME: " << FW_NAME << endl;
+      // Serial.println( "FW_VERSION: " << FW_VERSION << endl;
+      // Serial.println( "Setup Maintenance pin: " << GPIO_MAINTENANCE_PIN << endl;
+      // Serial.println( "///////////////////////////////////////////" << endl;
+      // Serial.println( "INFO: Device in normal mode." (;<< endl;
+
+      break;
+    }
     break;
   }
-
-  devicemanager.ConnectWifi();
-  MqttWrapper mqtt;
-  mqtt.Queue("/homie/msg", "{'a':122,'b':333}");
-  mqtt.Send();
-  
-  WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
-  Homie.getLogger() << endl;
-  Homie.getLogger() << "///////////////////////////////////////////" << endl;
-  Homie.getLogger() << "GPIO_MAINTENANCE_PIN: " << GPIO_MAINTENANCE_PIN << endl;
-  Homie.getLogger() << "GPIO_ONEWIRE_BUS: " << GPIO_ONEWIRE_BUS << endl;
-  Homie.getLogger() << "GPIO_HX711_SCK: " << GPIO_HX711_SCK << endl;
-  Homie.getLogger() << "GPIO_HX711_DT: " << GPIO_HX711_DT << endl;
-  Homie.getLogger() << "FW_NAME: " << FW_NAME << endl;
-  Homie.getLogger() << "FW_VERSION: " << FW_VERSION << endl;
-  Homie.getLogger() << "Setup Maintenance pin: " << GPIO_MAINTENANCE_PIN << endl;
-  Homie.getLogger() << "///////////////////////////////////////////" << endl;
-
-  // Homie.getLogger() << "INFO: Device in normal mode." << endl;
-
-  // if (devicemanager.IsColdstart())
-  // {
-  //   Homie.getLogger() << "DEBUG: Is Coldstart set new initial State" << endl;
-  //   devicemanager.SetStateAndMagicNumberToMemory();
-  //   devicemanager.SetStateToMemory(STATE_COLDSTART);
-  // }
-  // devicemanager.ReadStateFromMemory();
-  // switch (devicemanager.GetCurrentState())
-  // {
-  // default: // Catch all unknown states
-  // case STATE_SLEEP_WAKE:
-  //   // first run after power on - initializes
-  // case STATE_COLDSTART:
-  //   // Prepare to setup the WIFI
-
-  //   WiFi.forceSleepWake();
-  //   WiFi.mode(WIFI_STA);
-  //   // one more sleep required to to wake with wifi on
-  //   devicemanager.SetStateToMemory(STATE_CONNECT_WIFI);
-  //   devicemanager.GotToSleep(WAKE_RFCAL);
-
-  //   break;
-  // case STATE_CONNECT_WIFI:
-  //   Homie.onEvent(onHomieEvent);
-
-  //   temperatures.setup();
-
-  //   Homie.getLogger() << "DEBUG: Turn on WIFI: " << millis() / 1000 << endl;
-  //   WiFi.forceSleepWake();
-  //   delay(500);
-  //   wifi_set_sleep_type(MODEM_SLEEP_T);
-  //   Homie_setFirmware(FW_NAME, FW_VERSION);
-  //   Homie.setSetupFunction(setupHandler).setLoopFunction(loopHandler);
-  //   measures.AdvertiseNodes();
-  //   Homie.getLogger() << "DEBUG: Before setup(): " << millis() / 1000 << endl;
-  //   Homie.setup();
-  //   break;
-  // }
 }
 
 void loop()
 {
   if (!devicemanager.GetOperatingState() == OperatingStates::Maintenance)
   {
-    Homie.loop();
+    
   }
 }

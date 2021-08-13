@@ -17,7 +17,7 @@ public:
   void setup();
   void setupHandler();
   void AdvertiseNodes();
-  
+
   MeasureHandler();
 
   void SetWeightValue(float weightValue);
@@ -29,6 +29,7 @@ public:
   void SubmitData();
   void SetLowBattery(bool isLow);
   bool GetLowBattery();
+  float GetWeightValue();
 
 private:
   ConfigurationManager *configurationManager;
