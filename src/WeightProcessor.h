@@ -17,8 +17,22 @@ public:
   float getWeight(float temperatureForCompensation);
   float toKilogram(float getWeighMeasure);
   bool DeviceReady();
-  // Performs an automatic tare for the first run
-  void AutoTare();
+  
+/*
+To Autotare just following these steps
+
+1. Call SetScale().
+2 .Call Tare().
+3. Place a known weight on the scale and call get_units(10).
+
+
+Divide the result in step 3 to your known weight. You should get about the parameter you need to pass to set_scale().
+Adjust the parameter in step 4 until you get an accurate reading.
+
+*/
+  void SetScale();
+  void Tare();
+  float GetUnits();
 
   // Get an Singelton instance
   static WeightProcessor *getInstance(int dtPin, int scPin)

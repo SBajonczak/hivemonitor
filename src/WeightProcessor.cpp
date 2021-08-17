@@ -24,6 +24,22 @@ WeightProcessor::WeightProcessor(int dtPin, int scPin)
   scale.begin(_dtPin, _scPin);
 }
 
+
+void WeightProcessor::SetScale()
+{
+  scale.set_scale();
+}
+
+void WeightProcessor::Tare()
+{
+  scale.tare();
+}
+
+float WeightProcessor::GetUnits()
+{
+  scale.get_units(10);
+}
+
 void WeightProcessor::setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor)
 {
   this->_calibrationFactor = calibrationFactor;
@@ -35,14 +51,17 @@ void WeightProcessor::setup(float kilogramDivider, float weightOffset, float cal
 float WeightProcessor::getWeight()
 {
 
-  RunningMedian WeightSamples = RunningMedian(3);
   scale.power_up();
+  RunningMedian WeightSamples = RunningMedian(3);
   scale.set_scale(this->_kilogramDivider); //initialize scale
   scale.set_offset(this->_weightOffset);   //initialize scale
   for (int i = 0; i < 3; i++)
   {
-    float WeightRaw = scale.get_units(3);
+    float WeightRaw = scale.read_average(20);
+    Serial.print("Weight RAW Value:");
+    Serial.println(WeightRaw);
     WeightSamples.add(WeightRaw);
+    delay(250);
   }
   scale.power_down();
   float median = WeightSamples.getMedian();
@@ -57,23 +76,25 @@ WeightProcessor::~WeightProcessor()
 
 bool WeightProcessor::DeviceReady()
 {
-  return scale.wait_ready_timeout(200);
+  //  scale.power_up();
+
+  return scale.wait_ready_timeout(1000);
 }
 
 float WeightProcessor::getWeight(float temperatureForCompensation)
 {
-  // if (scale.is_ready())
-  // {
-  float weight = this->getWeight();
-  //temperature compensation
-  if (temperatureForCompensation < this->_calibrationTemperature)
-    weight = weight + (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
-  if (temperatureForCompensation > this->_calibrationTemperature)
-    weight = weight - (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
+  if (scale.is_ready())
+  {
+    float weight = this->getWeight();
+    //temperature compensation
+    if (temperatureForCompensation < this->_calibrationTemperature)
+      weight = weight + (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
+    if (temperatureForCompensation > this->_calibrationTemperature)
+      weight = weight - (fabs(temperatureForCompensation - this->_calibrationTemperature) * this->_calibrationFactor);
 
-  return weight;
-  // }
-  // return 0;
+    return weight;
+  }
+  return -127;
 }
 
 float WeightProcessor::toKilogram(float getWeighMeasure)
