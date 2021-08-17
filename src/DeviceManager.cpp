@@ -113,6 +113,7 @@ void DeviceManager::ConnectWifi()
   WiFi.mode(WIFI_STA);
   WiFi.begin(ConfigurationManager::getInstance()->GetWifiSsid(),
              ConfigurationManager::getInstance()->GetWifiPassword());
+  Serial.println("Conecting to wifi");
 
   while (WiFi.status() != WL_CONNECTED)
   {
