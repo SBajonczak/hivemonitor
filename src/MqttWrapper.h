@@ -12,6 +12,7 @@ public:
   void onMqttConnect();
   void Queue(char* Topic, char* msg);
   void Queue(char* Topic, float value);
+  void Queue(char *Topic, int value);
   void Send();
   void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 private:

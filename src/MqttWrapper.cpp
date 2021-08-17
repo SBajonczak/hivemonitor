@@ -19,24 +19,36 @@ void MqttWrapper::onMqttConnect()
         Serial.print("Topic:");
         Serial.println(internalTopic);
         Serial.print("Message:");
-        Serial.println(msg->message);
+        Serial.println(msg->msg);
         Serial.println("_____");
-        mqttClient.publish(internalTopic, 0, true, msg->message);
+        mqttClient.publish(internalTopic, 0, true, msg->msg.c_str());
     }
     MqttWrapper::messages.empty();
 }
 
-
 void MqttWrapper::Queue(char *Topic, float value)
 {
-    char result[8];
-    dtostrf(value, 6, 2, result);
-    MqttWrapper::messages.push_back(new Message(Topic, result));
+    Serial.print("Queue value:");
+    String result(value,2);
+    Message *m = new Message(Topic, result);
+    Serial.println(m->msg);
+    MqttWrapper::messages.push_back(m);
+}
+
+void MqttWrapper::Queue(char *Topic, int value)
+{
+    Serial.print("Queue value:");
+    String result(value);
+    Message *m = new Message(Topic, result);
+    Serial.println(m->msg);
+    MqttWrapper::messages.push_back(m);
 }
 
 void MqttWrapper::Queue(char *Topic, char *msg)
 {
-    MqttWrapper::messages.push_back(new Message(Topic, msg));
+    Message *data = new Message(Topic, msg);
+    Serial.println(data->msg);
+    MqttWrapper::messages.push_back(data);
 }
 
 void MqttWrapper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)

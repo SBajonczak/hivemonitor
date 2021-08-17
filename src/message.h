@@ -1,13 +1,13 @@
 #ifndef Message_H
 #define Message_H
-
+#include <Arduino.h>
 class Message
 {
 
 public:
-    Message(char *Topic, char *message);
+    Message(char *Topic, String messageData);
     ~Message();
-    char *message;
+    String msg;
     char *Topic;
 
 private:

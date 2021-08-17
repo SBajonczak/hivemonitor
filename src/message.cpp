@@ -1,7 +1,7 @@
 #include "message.h"
 
-Message::Message(char *Topic, char *message)
+Message::Message(char *Topic, String messageData)
 {
   this->Topic = Topic;
-  this->message = message;
+  this->msg = messageData;
 }
