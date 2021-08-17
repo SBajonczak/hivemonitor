@@ -111,7 +111,7 @@ void setup()
       temperatures.setup();
       WiFi.forceSleepWake();
       delay(500);
-      wifi_set_sleep_type(MODEM_SLEEP_T);
+      
 
       devicemanager.ConnectWifi();
       // Measure Battery
@@ -130,24 +130,27 @@ void setup()
           mqtt.Queue(internalTopic, measures.GetTemperaturValue(0));
           measures.SetTemperatureValue(0, temperatures.getTemperature(0));
         }
+        mqtt.Queue("/hive/Temperature/connected", 1);
       }
       else
       {
+        mqtt.Queue("/hive/Temperature/connected", 0);
         Serial.println("No Temperature Sensors connected");
       }
 
       WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
       if (scaledevice.DeviceReady())
       {
-        mqtt.Queue("/hive/weight", scaledevice.getWeight());
+        mqtt.Queue("/hive/weight/connected", 1);
+        mqtt.Queue("/hive/weight/value", scaledevice.getWeight());
       }
       else
       {
+        mqtt.Queue("/hive/weight/connected", 0);
         Serial.println("No Scaledevice connected");
       }
-      mqtt.Queue("/hive/battery/volt", measures.GetVoltage());
-      mqtt.Queue("/hive/battery/islow", measures.GetLowBattery());
-      mqtt.Queue("/hive/weight", measures.GetWeightValue());
+      mqtt.Queue("/hive/battery/volt", batteryProcessor.getVolt());
+      mqtt.Queue("/hive/battery/islow",1 );
       mqtt.Send();
 
       // When the battery is low, it mus sleep forever
@@ -161,18 +164,8 @@ void setup()
       }
 
       WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
-      // Serial.println() << endl;
-      // Serial.println( "///////////////////////////////////////////" << endl;
-      // Serial.println( "GPIO_MAINTENANCE_PIN: " << GPIO_MAINTENANCE_PIN << endl;
-      // Serial.println( "GPIO_ONEWIRE_BUS: " << GPIO_ONEWIRE_BUS << endl;
-      // Serial.println("GPIO_HX711_SCK: " << GPIO_HX711_SCK << endl;
-      // Serial.println( "GPIO_HX711_DT: " << GPIO_HX711_DT << endl;
-      // Serial.println( "FW_NAME: " << FW_NAME << endl;
-      // Serial.println( "FW_VERSION: " << FW_VERSION << endl;
-      // Serial.println( "Setup Maintenance pin: " << GPIO_MAINTENANCE_PIN << endl;
-      // Serial.println( "///////////////////////////////////////////" << endl;
-      // Serial.println( "INFO: Device in normal mode." (;<< endl;
-
+      // Set modem to sleep
+      wifi_set_sleep_type(MODEM_SLEEP_T);
       break;
     }
     break;
