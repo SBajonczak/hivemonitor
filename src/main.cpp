@@ -1,4 +1,3 @@
-// #include <Homie.h>
 #include <Ticker.h>
 #include "WeightProcessor.h"
 #include "TemperatureProcessor.h"
@@ -60,10 +59,16 @@ void max_run()
   }
 }
 
-
 void setup()
 {
   Serial.begin(115200);
+  if (!ConfigurationManager::getInstance()->HasValidConfiguration())
+  {
+
+    Serial.println("No valid configuration available. Starting configuration mode");
+    configServer.Serve();
+    return;
+  }
   // Get the settings
   ConfigurationManager::getInstance()->ReadSettings();
   // Homie.disableResetTrigger();
@@ -72,11 +77,12 @@ void setup()
   switch (devicemanager.GetOperatingState())
   {
   case OperatingStates::Maintenance:
-    Serial.println("Maintenance mode");
+    Serial.println("Maintenance / Configuration mode");
     configServer.Serve();
     return;
     break;
   case OperatingStates::Operating:
+    Serial.println("Normal mode");
 
     if (devicemanager.IsColdstart())
     {
@@ -101,8 +107,8 @@ void setup()
 
       break;
     case STATE_CONNECT_WIFI:
-      temperatures.setup();
 
+      temperatures.setup();
       WiFi.forceSleepWake();
       delay(500);
       wifi_set_sleep_type(MODEM_SLEEP_T);
@@ -177,6 +183,5 @@ void loop()
 {
   if (!devicemanager.GetOperatingState() == OperatingStates::Maintenance)
   {
-    
   }
 }
