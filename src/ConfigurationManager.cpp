@@ -84,6 +84,16 @@ String ConfigurationManager::GetJson()
   return values;
 }
 
+bool ConfigurationManager::HasValidConfiguration()
+{
+  bool exists = false;
+  if (SPIFFS.begin())
+  {
+    exists = SPIFFS.exists(CONFIG_FILE);
+  }
+  return exists;
+}
+
 DynamicJsonDocument ConfigurationManager::GetJsonDocument()
 {
   DynamicJsonDocument doc(JSON_DOCSIZE);

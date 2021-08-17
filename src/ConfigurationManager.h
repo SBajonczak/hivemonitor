@@ -19,6 +19,7 @@ public:
   double GetCalibrationFactorSetting();
   double GetVccAdjustSetting();
   void ApplyJsonInput(String json);
+  bool HasValidConfiguration();
 
   String GetWifiSsid();
   String GetWifiPassword();
