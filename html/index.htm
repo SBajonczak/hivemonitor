@@ -45,37 +45,45 @@
 
 				<div id="cTareStep0" style="display: none;">
 					<div class="container" style="font-weight:bold">
-						<p>Let's start to Tare your scale.
-							Please get a weight of 1 (one) Kilogram, because this will be needed in the Tare steps.
-						</p>
-						<p>Remove all weight from the scale and click "Start".</p>
+
+
+						<div id="welcome" class="grid bg-white rounded-lg shadow-sm p-1 mt-1">
+							<p class="font-bold">Let's start to adjust the scale device ⚖ for you </p>
+							<p>You will be guided throught 3 steps.</p>
+							</br>
+							<div id="tareStep1">
+								<p>First Step Remove all weight from the scale and click "Start".</p>
+							</div>
+							<div id="zeroArea" style="display: none;">
+								<span id="zeroValue">Measuring zero Value! Please wait...</span>
+							</div>
+							</br>
+							
+							<div id="tareStep2" style="display: none;">
+								<p>Place a weight of 1 (one) Kilogram on to the scale device and click on "Start"</p>
+							</div>
+							<div id="oneKilogrammArea" style="display: none;"><span id="onKilogramValue">Masuring one Kilogram Value! Please
+									wait...</span>
+							</div>
+
+						</div>
+
+						<p></p>
 						<button id="btnTare" onclick="toggleIndex()">
 							<p class="tab-label">Go Back</p>
 						</button>
 
-						<button id="btnTare" onclick="startTare()">
+						<button id="btnTare"
+							class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded col-span-2"
+							onclick="startTare()">
 							<p class="tab-label">Start</p>
 						</button>
+
 					</div>
 				</div>
 
-				<div id="cTareStep1" style="display: none;">
-					<div class="container" style="font-weight:bold">
-						<p>Place a weight of 1 (one) Kilogram on the scale.</p>
-						<button id="btnTare" onclick="tareStep2()">
-							<p class="tab-label">Next Step</p>
-						</button>
-					</div>
-				</div>
-
-				<div id="cTareStep2" style="display: none;">
-					<div class="container" style="font-weight:bold">
-						<p>Congratulations! The Scale is now ready to use.</p>
-						<button id="btnTare" onclick="toggleIndex()">
-							<p class="tab-label">Go Back</p>
-						</button>
-					</div>
-				</div>
+				
+			
 
 
 				<div id="cSettings" class="container grid grid-cols-2">

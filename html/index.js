@@ -43,11 +43,9 @@ function setInitialPage() {
             toogleAutoTare();
             break;
         case "TARE1":
-            setDisplay("cTareStep1", "block");
+            setDisplay("tareStep2", "block");
             break;
-        case "TARE2":
-            setDisplay("cTareStep2", "block");
-            break;
+       
     }
 }
 function parseQuery() {
@@ -67,8 +65,6 @@ function toggleIndex() {
 
 function hideAllControls() {
     setDisplay("cTareStep0", "none");
-    setDisplay("cTareStep1", "none");
-    setDisplay("cTareStep2", "none");
     setDisplay("cSettings", "none");
     setDisplay("welcome", "none");
     setDisplay("cv", "none");
@@ -118,9 +114,23 @@ function tareStep2() {
 }
 
 function startTare() {
-    sendData({}, "tarestep0").then((data) => {
-        ActualPage = "TARE1";
-        setControls();
+    read(2"getWeightValue").then((data) => {
+        switch (ActualPage) {
+            case "TARE1":
+                setDisplay("zeroArea", "block");
+                setLabel("zeroValue", "".concat("The measured kilogram divider is: ", data));
+                setTextBoxValue("scale_kilogramdivider", data);
+                ActualPage = "TARE1";
+                setControls();
+
+            default:
+                setDisplay("zeroArea", "block");
+                setLabel("zeroValue", "".concat("The measured weight offset is: ", data));
+                setTextBoxValue("scale_weightoffset", data);
+                ActualPage = "TARE1";
+                setControls();
+                break;
+        }
     }).catch(() => { });
 }
 
@@ -178,6 +188,12 @@ function getTextBoxNumberValue(id) {
 function setTextBoxValue(id, value) {
     d.getElementById(id).value = value;
 }
+
+
+function setLabel(id, value) {
+    d.getElementById(id).innerHTML = value;
+}
+
 
 function saveSettings() {
     var objectData = {

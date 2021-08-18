@@ -54,9 +54,17 @@ void DeviceManager::GotToSleep(WakeMode mode)
 
 void DeviceManager::GotToSleep()
 {
+  int seconds = this->GetSleepTime();
+  if (seconds==0){
+    // Preventing to go to sleep forever.
+    seconds=5;
+  }
   // Set the next state into the memory.
   this->SetStateToMemory(STATE_SLEEP_WAKE);
-  ESP.deepSleep(this->GetSleepTime() * 1000000);
+  Serial.print("Sleep now for ");
+  Serial.print(seconds * 1000000);
+  Serial.println(" seconds");
+  ESP.deepSleep(seconds * 1000000);
 }
 
 void DeviceManager::SetStateToMemory(byte value)

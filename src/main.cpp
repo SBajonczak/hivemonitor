@@ -9,10 +9,6 @@
 #include "ConfigWebserver.h"
 #include "MqttWrapper.h"
 
-#define FW_NAME "Development"
-#define FW_VERSION "0.10.0"
-const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
-const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x48\xd4\x1a";
 
 // Set the Mode for the BAttery measuring
 ADC_MODE(ADC_VCC);
@@ -62,7 +58,7 @@ void max_run()
 void setup()
 {
   Serial.begin(115200);
-  if (!ConfigurationManager::getInstance()->HasValidConfiguration())
+  if (ConfigurationManager::getInstance()->HasValidConfiguration())
   {
 
     Serial.println("No valid configuration available. Starting configuration mode");
@@ -111,7 +107,8 @@ void setup()
       temperatures.setup();
       WiFi.forceSleepWake();
       delay(500);
-      
+      // Set modem to sleep
+      wifi_set_sleep_type(MODEM_SLEEP_T);
 
       devicemanager.ConnectWifi();
       // Measure Battery
@@ -150,7 +147,7 @@ void setup()
         Serial.println("No Scaledevice connected");
       }
       mqtt.Queue("/hive/battery/volt", batteryProcessor.getVolt());
-      mqtt.Queue("/hive/battery/islow",1 );
+      mqtt.Queue("/hive/battery/islow", 1);
       mqtt.Send();
 
       // When the battery is low, it mus sleep forever
@@ -164,8 +161,8 @@ void setup()
       }
 
       WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
-      // Set modem to sleep
-      wifi_set_sleep_type(MODEM_SLEEP_T);
+
+      devicemanager.GotToSleep();
       break;
     }
     break;

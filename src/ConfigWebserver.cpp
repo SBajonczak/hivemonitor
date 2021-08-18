@@ -5,6 +5,7 @@
 #include "AsyncJson.h"
 #include "ArduinoJson.h"
 
+#include "WeightProcessor.h"
 #include "ConfigWebserver.h"
 #include "ConfigurationManager.h"
 #include "html\html_ui.h"
@@ -46,23 +47,15 @@ void ConfigWebserver::Serve()
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
   server.addHandler(storeConfigHandler);
 
-  // server.on("/tarestep0", HTTP_POST, [](AsyncWebServerRequest *request)
-  //           {
-  //             WeightProcessor *scaledevice = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
-  //             if (scaledevice->getWeight())
-  //             {
-  //               float offset = scaledevice->getWeight(0);
-  //               Serial.println("Offset");
-  //               Serial.println(offset);
-  //               request->send(200);
-  //             }
-  //             else
-  //             {
-  //               Serial.println("Not available");
-  //               request->send(500, "text"
-  //                                  "Scale not ready or connected!");
-  //             }
-  //           });
+  server.on("/getWeightValue", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+              WeightProcessor *scaledevice = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
+              
+                float offset = scaledevice->getRawWeight();
+                Serial.println("Offset");
+                Serial.println(offset);
+                request->send(200, "text", String(offset));
+            });
 
   // server.on(
   //     "/tarestep1", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,

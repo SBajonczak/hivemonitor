@@ -24,7 +24,6 @@ WeightProcessor::WeightProcessor(int dtPin, int scPin)
   scale.begin(_dtPin, _scPin);
 }
 
-
 void WeightProcessor::SetScale()
 {
   scale.set_scale();
@@ -51,19 +50,20 @@ void WeightProcessor::setup(float kilogramDivider, float weightOffset, float cal
 float WeightProcessor::getWeight()
 {
 
-  scale.power_up();
   RunningMedian WeightSamples = RunningMedian(3);
   scale.set_scale(this->_kilogramDivider); //initialize scale
   scale.set_offset(this->_weightOffset);   //initialize scale
   for (int i = 0; i < 3; i++)
   {
-    float WeightRaw = scale.read_average(20);
+
+    scale.power_up();
+    float WeightRaw = scale.read_average(3);
+    scale.power_down();
     Serial.print("Weight RAW Value:");
     Serial.println(WeightRaw);
     WeightSamples.add(WeightRaw);
     delay(250);
   }
-  scale.power_down();
   float median = WeightSamples.getMedian();
   Serial.print("Median:");
   Serial.println(median);
@@ -76,9 +76,31 @@ WeightProcessor::~WeightProcessor()
 
 bool WeightProcessor::DeviceReady()
 {
-  //  scale.power_up();
 
   return scale.wait_ready_timeout(1000);
+}
+
+
+
+
+float WeightProcessor::getRawWeight()
+{
+
+  RunningMedian WeightSamples = RunningMedian(3);
+  for (int i = 0; i < 3; i++)
+  {
+    scale.power_up();
+    float WeightRaw = scale.read_average(3);
+    scale.power_down();
+    Serial.print("Weight RAW Value:");
+    Serial.println(WeightRaw);
+    WeightSamples.add(WeightRaw);
+    delay(250);
+  }
+  float median = WeightSamples.getMedian();
+  Serial.print("Median:");
+  Serial.println(median);
+  return median;
 }
 
 float WeightProcessor::getWeight(float temperatureForCompensation)

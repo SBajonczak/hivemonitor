@@ -15,6 +15,7 @@ public:
   void setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor);
   float getWeight();
   float getWeight(float temperatureForCompensation);
+  float getRawWeight();
   float toKilogram(float getWeighMeasure);
   bool DeviceReady();
   
