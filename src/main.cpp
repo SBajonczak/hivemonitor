@@ -58,7 +58,7 @@ void max_run()
 void setup()
 {
   Serial.begin(115200);
-  if (ConfigurationManager::getInstance()->HasValidConfiguration())
+  if (!ConfigurationManager::getInstance()->HasValidConfiguration())
   {
 
     Serial.println("No valid configuration available. Starting configuration mode");
