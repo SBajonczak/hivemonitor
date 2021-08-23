@@ -39,13 +39,9 @@ function setInitialPage() {
         case "INDEX":
             toggleIndex();
             break;
-        case "TARE":
+        case "TARE_START":
             toogleAutoTare();
             break;
-        case "TARE1":
-            setDisplay("tareStep2", "block");
-            break;
-       
     }
 }
 function parseQuery() {
@@ -81,7 +77,7 @@ function setDisplay(control, state) {
 }
 
 function toogleAutoTare() {
-    ActualPage = "TARE";
+    ActualPage = "TARE_START";
     hideAllControls();
     setDisplay("cTareStep0", "block");
 }
@@ -98,40 +94,45 @@ function setBreadCrumb() {
             pl.innerText = "Start";
             break;
         case "TARE":
-        case "TARE1":
-        case "TARE2":
+        case "TARE_FINISH":
             pl.innerText = "Tare Scale";
             break;
     }
 
 
 }
-function tareStep2() {
-    sendData({}, "tarestep1").then((data) => {
-        ActualPage = "TARE2";
-        setControls();
-    }).catch(() => { });
-}
 
 function startTare() {
-    read(2"getWeightValue").then((data) => {
-        switch (ActualPage) {
-            case "TARE1":
-                setDisplay("zeroArea", "block");
-                setLabel("zeroValue", "".concat("The measured kilogram divider is: ", data));
+    setLabel("measuringMessage", "Measuring! Please Wait... ");
+    setDisplay("measuring", "block");
+    console.log("Actual Page:" + ActualPage);
+    setDisplay("btnTare","none");
+    switch (ActualPage) {
+        case "TARE_STEP2":
+            read("getWeightValue").then((data) => {
+                setDisplay("btnTare","block");
                 setTextBoxValue("scale_kilogramdivider", data);
-                ActualPage = "TARE1";
+                ActualPage = "INDEX";
                 setControls();
-
-            default:
-                setDisplay("zeroArea", "block");
-                setLabel("zeroValue", "".concat("The measured weight offset is: ", data));
+            }).catch(() => { });
+            break;
+        case "TARE_START":
+            read("getWeightValue").then((data) => {
+                setDisplay("btnTare","block");
+                setDisplay("measuring", "none");
+                setDisplay("tareStep2", "block")
+                setLabel("measuringMessage", "".concat("The measured weight offset is: ", data));
                 setTextBoxValue("scale_weightoffset", data);
-                ActualPage = "TARE1";
+                ActualPage = "TARE_STEP2";
                 setControls();
-                break;
-        }
-    }).catch(() => { });
+                setDisplay("measuring", "block");
+                setDisplay("cTareStep0", "block");
+            }).catch(() => { });
+            break;
+        default:
+
+    }
+
 }
 
 function sendData(json, uri) {

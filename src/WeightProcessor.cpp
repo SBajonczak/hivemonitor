@@ -95,7 +95,7 @@ float WeightProcessor::getRawWeight()
     Serial.print("Weight RAW Value:");
     Serial.println(WeightRaw);
     WeightSamples.add(WeightRaw);
-    delay(250);
+    delay(50);
   }
   float median = WeightSamples.getMedian();
   Serial.print("Median:");
