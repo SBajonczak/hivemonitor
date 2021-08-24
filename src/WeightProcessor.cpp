@@ -36,7 +36,7 @@ void WeightProcessor::Tare()
 
 float WeightProcessor::GetUnits()
 {
-  scale.get_units(10);
+  return scale.get_units(10);
 }
 
 void WeightProcessor::setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor)
