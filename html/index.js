@@ -1,5 +1,5 @@
 var ActualPage = "INDEX";
-
+var ScaleConnected = false;
 var d = document;
 function onLoad() {
     hideAllControls();
@@ -8,9 +8,29 @@ function onLoad() {
     setInitialPage();
     setDisplay("cv", "none");
     GetSettings();
-}
 
+}
+function disableScaleSettings() {
+    console.log("disabling scale controls");
+    setDisplay("scaleNotConnected", "block");
+    setDisplay("btnStartTare", "none");
+    setControlState("scale_calibrationfactorsetting", true);
+    
+    setControlState("scale_calibrationtemperaturesetting", true);
+    setControlState("scale_kilogramdivider", true);
+    setControlState("scale_weightoffset", true);
+}
 function GetSettings() {
+    read("info").then((data) => {
+        console.log(data);
+        ScaleConnected = data.sensors.scale.connected;
+        setDisplay("scaleNotConnected", "none");
+        if (!ScaleConnected) {
+            disableScaleSettings();
+        } else {
+            console.log("Scale connected");
+        }
+    });
     read("settings").then((data) => {
         console.debug(data);
         setTextBoxValue("system_sleeptime", data.system.sleeptime);
@@ -28,10 +48,6 @@ function GetSettings() {
 
         setTextBoxValue("wireles_password", data.wireles.password);
         setTextBoxValue("wireles_ssid", data.wireles.ssid);
-
-
-
-
     });
 }
 function setInitialPage() {
@@ -76,6 +92,23 @@ function setDisplay(control, state) {
     }
 }
 
+function setStyle(control, style) {
+    var ct = document.getElementById(control);
+    ct.style = style;
+}
+
+function setControlState(control, disabled) {
+    var ct = document.getElementById(control);
+    if (disabled) {
+        ct.disabled = "disabled";
+    } else {
+        ct.disabled = "";
+
+    }
+}
+
+
+
 function toogleAutoTare() {
     ActualPage = "TARE_START";
     hideAllControls();
@@ -103,14 +136,15 @@ function setBreadCrumb() {
 }
 
 function startTare() {
+
     setLabel("measuringMessage", "Measuring! Please Wait... ");
     setDisplay("measuring", "block");
     console.log("Actual Page:" + ActualPage);
-    setDisplay("btnTare","none");
+    setDisplay("btnTare", "none");
     switch (ActualPage) {
         case "TARE_STEP2":
             read("getWeightValue").then((data) => {
-                setDisplay("btnTare","block");
+                setDisplay("btnTare", "block");
                 setTextBoxValue("scale_kilogramdivider", data);
                 ActualPage = "INDEX";
                 setControls();
@@ -118,7 +152,7 @@ function startTare() {
             break;
         case "TARE_START":
             read("getWeightValue").then((data) => {
-                setDisplay("btnTare","block");
+                setDisplay("btnTare", "block");
                 setDisplay("measuring", "none");
                 setDisplay("tareStep2", "block")
                 setLabel("measuringMessage", "".concat("The measured weight offset is: ", data));

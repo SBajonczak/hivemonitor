@@ -5,6 +5,7 @@
 #include "AsyncJson.h"
 #include "ArduinoJson.h"
 
+#include "TemperatureProcessor.h"
 #include "WeightProcessor.h"
 #include "ConfigWebserver.h"
 #include "ConfigurationManager.h"
@@ -50,18 +51,12 @@ void ConfigWebserver::Serve()
   server.on("/getWeightValue", HTTP_GET, [](AsyncWebServerRequest *request)
             {
               WeightProcessor *scaledevice = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
-              
-                float offset = scaledevice->getRawWeight();
-                Serial.println("Offset");
-                Serial.println(offset);
-                request->send(200, "text", String(offset));
+
+              float offset = scaledevice->getRawWeight();
+              Serial.println("Offset");
+              Serial.println(offset);
+              request->send(200, "text", String(offset));
             });
-
-  // server.on(
-  //     "/tarestep1", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
-  //     [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-
-  //     });
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -80,6 +75,16 @@ void ConfigWebserver::Serve()
               Serial.println("Settings: ");
               Serial.println(settings);
               request->send(200, "application/json", settings);
+            });
+
+  server.on("/info", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+              WeightProcessor *weightProcessor = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
+              DynamicJsonDocument doc(512);
+              doc["sensors"]["scale"]["connected"]= weightProcessor->DeviceReady();
+              String bodyString;
+              serializeJson(doc, bodyString);
+              request->send(200, "application/json", bodyString);
             });
 
   server.begin();

@@ -8,20 +8,22 @@
 #include <DallasTemperature.h>
 #include <Wire.h>
 
-
 class TemperatureProcessor
 {
-public:
-    TemperatureProcessor(int onwWirePin);
-    void setup();
-    float getTemperature(int devicenumber);
-    int getDeviceCount();
-private:
-    OneWire oneWire;
-    DallasTemperature sensors;
 
-    int _oneWirePin;
-    int _connectedDevices;
+public:
+  TemperatureProcessor(int onwWirePin);
+  void setup();
+  float getTemperature(int devicenumber);
+  int getDeviceCount();
+
+
+private:
+  OneWire oneWire;
+  DallasTemperature sensors;
+
+  int _oneWirePin;
+  int _connectedDevices;
 };
 
 #endif
