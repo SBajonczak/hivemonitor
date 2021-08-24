@@ -9,7 +9,7 @@
 #include "WeightProcessor.h"
 #include "ConfigWebserver.h"
 #include "ConfigurationManager.h"
-#include ".\html\html_ui.h"
+#include "html.h"
 
 #define AP_SSIDNAME "HiveMonitor"
 #define AP_PASSWORD "B33$"

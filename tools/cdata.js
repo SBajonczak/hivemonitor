@@ -186,7 +186,7 @@
    fs.writeFileSync(resultFile, src);
  }
  
-writeHtmlGzipped("html/index.htm", "src/html/html_ui.h");
+writeHtmlGzipped("html/index.htm", "src/html.h");
  
  writeChunks(
    "html",
@@ -230,6 +230,6 @@ writeHtmlGzipped("html/index.htm", "src/html/html_ui.h");
            .replace(/function GetV().*\<\/script\>/gms, "function GetV() {\n"),
      }
    ],
-   "src/html/html_settings.h"
+   "src/html_settings.h"
  );
  
