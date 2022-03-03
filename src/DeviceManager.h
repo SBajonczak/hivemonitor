@@ -4,7 +4,7 @@
 #ifndef DeviceManager_h
 #define DeviceManager_h
 #include "WeightProcessor.h"
-
+#include <Arduino.h>
 // The Memmory Adress for the state
 #define RTC_STATE 66
 #define RTC_BASE 65

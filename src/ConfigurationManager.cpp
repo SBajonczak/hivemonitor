@@ -1,8 +1,5 @@
 #include <ConfigurationManager.h>
 #include <EEPROM.h> // Reference for Memmory handling
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <FS.h> // Include the SPIFFS library
 #define CONFIG_FILE "/config.json"
 
 // Avoiding compile issues

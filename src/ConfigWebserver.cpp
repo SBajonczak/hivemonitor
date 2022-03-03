@@ -4,6 +4,7 @@
 #include "Arduino.h"
 #include "AsyncJson.h"
 #include "ArduinoJson.h"
+#include <DNSServer.h>
 
 #include "TemperatureProcessor.h"
 #include "WeightProcessor.h"

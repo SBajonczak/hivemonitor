@@ -3,9 +3,9 @@
 */
 #ifndef ConfigurationManager_h
 #define ConfigurationManager_h
-
-#include <Homie.h>
-
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <FS.h> // Include the SPIFFS library
 class ConfigurationManager
 {
 

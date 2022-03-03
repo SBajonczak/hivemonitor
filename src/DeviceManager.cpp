@@ -1,9 +1,9 @@
 #include <DeviceManager.h>
 #include "TareUtility.h"
 #include "ConfigurationManager.h"
+#include <ESP8266WiFi.h>
 
 void DeviceManager::setup() {}
-
 char DeviceManager::_deviceId[]; // need to define the static variable
 
 #ifdef ESP32

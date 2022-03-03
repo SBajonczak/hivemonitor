@@ -1,6 +1,5 @@
 #ifndef MeasureHandler_h
 #define MeasureHandler_h
-// #include <Homie.h>
 #include "ConfigurationManager.h"
 
 //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
