@@ -3,8 +3,6 @@
 */
 #ifndef DeviceManager_h
 #define DeviceManager_h
-
-#include <Homie.h>
 #include "WeightProcessor.h"
 
 // The Memmory Adress for the state

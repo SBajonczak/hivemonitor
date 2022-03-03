@@ -1,5 +1,4 @@
 #include <DeviceManager.h>
-
 #include "TareUtility.h"
 #include "ConfigurationManager.h"
 
