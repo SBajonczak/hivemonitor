@@ -1,10 +1,9 @@
 #include <AsyncMqttClient.h>
-
 #include "MqttWrapper.h"
 #include "ConfigurationManager.h"
 #include "message.h"
+#include <ArduinoJson.h>
 AsyncMqttClient mqttClient;
-
 std::vector<Message *> MqttWrapper::messages;
 
 void MqttWrapper::onMqttConnect()
@@ -29,7 +28,7 @@ void MqttWrapper::onMqttConnect()
 void MqttWrapper::Queue(char *Topic, float value)
 {
     Serial.print("Queue value:");
-    String result(value,2);
+    String result(value, 2);
     Message *m = new Message(Topic, result);
     Serial.println(m->msg);
     MqttWrapper::messages.push_back(m);
@@ -51,6 +50,12 @@ void MqttWrapper::Queue(char *Topic, char *msg)
     MqttWrapper::messages.push_back(data);
 }
 
+void MqttWrapper::Queue(char *Topic, String msg)
+{
+    Message *data = new Message(Topic, msg);
+    Serial.println(data->msg);
+}
+
 void MqttWrapper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
     Serial.print("MQTT Disconnect Reason: ");
@@ -59,16 +64,20 @@ void MqttWrapper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 
 void MqttWrapper::Send()
 {
-    Serial.println("Setting up mqtt connection");
-    mqttClient.setServer("192.168.178.201", ConfigurationManager::getInstance()->GetMqttPort());
-    if (
-        ConfigurationManager::getInstance()->GetMqttUser().length() > 0 &&
-        ConfigurationManager::getInstance()->GetMqttPassword().length() > 0)
-    {
-        mqttClient.setCredentials(
-            ConfigurationManager::getInstance()->GetMqttUser().c_str(),
-            ConfigurationManager::getInstance()->GetMqttPassword().c_str());
-    }
+    mqttClient.setServer(ConfigurationManager::getInstance()->GetMqttServer().c_str(), ConfigurationManager::getInstance()->GetMqttPort());
+    String username;
+
+    username += ConfigurationManager::getInstance()->GetMqttServer();
+    username += "/";
+    username += ConfigurationManager::getInstance()->GetMqttUser();//this->deviceID;
+    // username +="/";
+    // username +="HIVE-SENSORS";
+    username += "/?api-version=2018-06-30";
+    
+    Serial.print("using Username: ");
+    Serial.println(username);
+    mqttClient.setClientId(this->deviceID);
+    mqttClient.setCredentials(ConfigurationManager::getInstance()->GetMqttUser().c_str(), "SharedAccessSignature sr=sba-iot-hub.azure-devices.net%2Fdevices%2FBETA-HIVE&sig=k1zj6j5iLqyf7dve54SlzGwRh565%2BAwvgsgy93rzXx8%3D&se=1677847336");
     mqttClient.onConnect(std::bind(&MqttWrapper::onMqttConnect, this));
     mqttClient.onDisconnect(std::bind(&MqttWrapper::onMqttDisconnect, this, std::placeholders::_1));
     mqttClient.connect();
@@ -77,6 +86,7 @@ void MqttWrapper::Send()
     {
         delay(500);
     }
+    Serial.println("Connected");
 }
 
 MqttWrapper::MqttWrapper(char *deviceID)
