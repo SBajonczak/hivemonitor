@@ -1,10 +1,6 @@
-/*
-  StateManager.h - Helper Libary for managing the Homie states.
-*/
 #ifndef MeasureHandler_h
 #define MeasureHandler_h
-
-#include <Homie.h>
+// #include <Homie.h>
 #include "ConfigurationManager.h"
 
 //Workaround for https://github.com/bblanchon/ArduinoJson/issues/566
@@ -14,9 +10,7 @@ class MeasureHandler
 {
 
 public:
-  void setup();
   void setupHandler();
-  void AdvertiseNodes();
 
   MeasureHandler();
 
@@ -26,7 +20,6 @@ public:
   float GetVoltage();
   // Get the Temperature Value for the given index.
   float GetTemperaturValue(int index);
-  void SubmitData();
   void SetLowBattery(bool isLow);
   bool GetLowBattery();
   float GetWeightValue();

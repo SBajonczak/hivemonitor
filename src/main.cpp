@@ -39,7 +39,6 @@ MqttWrapper mqtt(devicemanager.getDeviceID());
 
 void setupHandler()
 {
-  measures.setup();
 }
 
 void max_run()
