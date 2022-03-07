@@ -11,7 +11,6 @@
 #define MQTT_PACKET_SIZE 1024
 #define MQTT_SERVER "sba-iot-hub.azure-devices.net"
 #define MQTT_PORT 8883
-std::vector<Message *> MqttWrapper::messages;
 
 // static X509List cert((const char *)ca_pem);
 void MqttWrapper::onMqttConnect()
@@ -21,13 +20,7 @@ void MqttWrapper::onMqttConnect()
 }
 
 
-void MqttWrapper::Queue(String msg)
-{
-    Serial.print("Queue value:");
-    Message *data = new Message(Topic, msg);
-    Serial.println(data->msg);
-    MqttWrapper::messages.push_back(data);
-}
+
 
 void MqttWrapper::Setup()
 {
@@ -38,14 +31,14 @@ bool MqttWrapper::IsConnected()
 {
     return this->connected;
 }
-void MqttWrapper::Send()
+void MqttWrapper::Send(String msg)
 {
     if (_client.connected())
     {
         String topic = this->_credentialManager.GetTopicName();
         Serial.print("Topic: ");
         Serial.println(topic);
-        _client.publish(topic.c_str(), "Test", false);
+        _client.publish(topic.c_str(), msg.c_str(), false);
 
         _client.loop();
     }

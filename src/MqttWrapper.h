@@ -14,7 +14,7 @@ public:
   ~MqttWrapper();
   void onMqttConnect();
   void Queue(String msg);
-  void Send();
+  void Send(String msg);
   bool IsConnected();
   void Connect();
   // void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
