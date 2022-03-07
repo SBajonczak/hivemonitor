@@ -1,13 +1,15 @@
 {
     "system": {
         "sleeptime": 20,
-        "vccadjustsetting": 0
+        "vccadjustsetting": 0,
+        "setupIp":"1.2.3.4"
     },
+
     "mqtt": {
-        "server": "192.168.178.201",
-        "port": 1886,
-        "user": "ulf",
-        "password": "hermes"
+        "server": "sba-iot-hub.azure-devices.net",
+        "port": 8883,
+        "user": "BETA-HIVE",
+        "password": ""
     },
     "scale":{
         "weightoffset":0,
@@ -16,7 +18,7 @@
         "calibrationfactorSetting":0
     },
     "wireles": {
-        "password": "password",
-        "ssid": "myssid"
+        "password": "Tumalonga2411",
+        "ssid": "Ponyhof"
     }
 }
