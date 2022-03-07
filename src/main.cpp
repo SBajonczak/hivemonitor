@@ -14,9 +14,7 @@
 #include <azure_ca.h>
 #define NTP_SERVERS "pool.ntp.org", "time.nist.gov"
 
-
-
- WiFiClientSecure wifi_client;
+WiFiClientSecure wifi_client;
 X509List cert((const char *)ca_pem);
 PubSubClient mqtt_client(wifi_client);
 
@@ -128,72 +126,75 @@ void setup()
       break;
     case STATE_CONNECT_WIFI:
 
-    
       WiFi.forceSleepWake();
-    //Set modem to sleep
-    wifi_set_sleep_type(MODEM_SLEEP_T);
+      // Set modem to sleep
+      wifi_set_sleep_type(MODEM_SLEEP_T);
 
-    temperatures.setup();
-    devicemanager.ConnectWifi();
-    Serial.println("Normal mode");
-    mqtt.Connect();
+      temperatures.setup();
+      devicemanager.ConnectWifi();
+      Serial.println("Normal mode");
+      mqtt.Connect();
 
-    // Measure Battery
-    measures.SetLowBattery(batteryProcessor.IsLow());
-    measures.SetVoltage(batteryProcessor.getVolt());
+      // Measure Battery
+      measures.SetLowBattery(batteryProcessor.IsLow());
+      measures.SetVoltage(batteryProcessor.getVolt());
 
-    // Get temperature
-    if (temperatures.getDeviceCount() > 0)
-    {
-      for (int i = 0; i < temperatures.getDeviceCount(); i++)
+      DynamicJsonDocument doc(1024);
+
+      // Get temperature
+      if (temperatures.getDeviceCount() > 0)
       {
-        char internalTopic[155];
-        strcpy(internalTopic, "/hive/Temperature/");
-        strcat(internalTopic, String(i).c_str());
-        strcat(internalTopic, "/value");
-        mqtt.Queue(internalTopic, measures.GetTemperaturValue(0));
-        measures.SetTemperatureValue(0, temperatures.getTemperature(0));
+        for (int i = 0; i < temperatures.getDeviceCount(); i++)
+        {
+          doc["Temperatures"][i]["Celsius"] = measures.GetTemperaturValue(0);
+          doc["Temperatures"][i]["Index"] = i;
+        }
+        doc["Temperatures"]["Connected"] = true;
       }
-      mqtt.Queue("/hive/Temperature/connected", 1);
-    }
-    else
-    {
-      mqtt.Queue("/hive/Temperature/connected", 0);
-      Serial.println("No Temperature Sensors connected");
-    }
-
-    WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
-    if (scaledevice.DeviceReady())
-    {
-      mqtt.Queue("/hive/weight/connected", 1);
-      mqtt.Queue("/hive/weight/value", scaledevice.getWeight());
-    }
-    else
-    {
-      mqtt.Queue("/hive/weight/connected", 0);
-      Serial.println("No Scaledevice connected");
-    }
-    mqtt.Queue("/hive/battery/volt", batteryProcessor.getVolt());
-    mqtt.Queue("/hive/battery/islow", 1);
-    Serial.println("Try to send");
-    mqtt.Send();
-
-    // When the battery is low, it mus sleep forever
-    if (measures.GetLowBattery())
-    {
-      devicemanager.SetSleepTime(0);
-    }
-    else
-    {
-      devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
-    }
-
-     WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
-
-    devicemanager.GotToSleep();
-        break;
+      else
+      {
+        doc["Temperatures"]["Connected"] = false;
+        Serial.println("No Temperature Sensors connected");
       }
+
+      WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+      if (scaledevice.DeviceReady())
+      {
+        doc["weight"]["Connected"] = true;
+        doc["weight"]["value"] = scaledevice.getWeight();
+      }
+      else
+      {
+        doc["weight"]["Connected"] = false;
+        Serial.println("No Scaledevice connected");
+      }
+      doc["System"]["Battery"]["Volts"] = batteryProcessor.getVolt();
+      doc["System"]["Battery"]["islow"] = measures.GetLowBattery();
+
+      time_t now = time(NULL);
+      doc["System"]["Time"] = ctime(&now);
+      Serial.println("Try to send");
+      String jsonData;
+      serializeJson(doc, jsonData);
+
+      mqtt.Send(jsonData);
+
+      // When the battery is low, it mus sleep forever
+      if (measures.GetLowBattery())
+      {
+        devicemanager.SetSleepTime(0);
+      }
+      else
+      {
+        devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
+      }
+
+      WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
+
+      devicemanager.GotToSleep();
       break;
+    }
+    break;
   }
 }
 
