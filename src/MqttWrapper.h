@@ -13,10 +13,7 @@ public:
   MqttWrapper(char *deviceID, PubSubClient client);
   ~MqttWrapper();
   void onMqttConnect();
-  void Queue(char *Topic, char *msg);
-  void Queue(char *Topic, float value);
-  void Queue(char *Topic, int value);
-  void Queue(char *Topic, String msg);
+  void Queue(String msg);
   void Send();
   bool IsConnected();
   void Connect();

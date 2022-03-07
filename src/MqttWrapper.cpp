@@ -20,32 +20,8 @@ void MqttWrapper::onMqttConnect()
     MqttWrapper::messages.empty();
 }
 
-void MqttWrapper::Queue(char *Topic, float value)
-{
-    Serial.print("Queue value:");
-    String result(value, 2);
-    Message *m = new Message(Topic, result);
-    Serial.println(m->msg);
-    MqttWrapper::messages.push_back(m);
-}
 
-void MqttWrapper::Queue(char *Topic, int value)
-{
-    Serial.print("Queue value:");
-    String result(value);
-    Message *m = new Message(Topic, result);
-    Serial.println(m->msg);
-    MqttWrapper::messages.push_back(m);
-}
-
-void MqttWrapper::Queue(char *Topic, char *msg)
-{
-    Message *data = new Message(Topic, msg);
-    Serial.println(data->msg);
-    MqttWrapper::messages.push_back(data);
-}
-
-void MqttWrapper::Queue(char *Topic, String msg)
+void MqttWrapper::Queue(String msg)
 {
     Serial.print("Queue value:");
     Message *data = new Message(Topic, msg);
