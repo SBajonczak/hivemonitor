@@ -1,6 +1,3 @@
-/*
-  StateManager.h - Helper Libary for managing the Homie states.
-*/
 #ifndef ConfigurationManager_h
 #define ConfigurationManager_h
 #include <Arduino.h>
