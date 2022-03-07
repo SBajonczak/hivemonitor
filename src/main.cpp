@@ -173,6 +173,7 @@ void setup()
 
       time_t now = time(NULL);
       doc["System"]["Time"] = ctime(&now);
+      doc["System"]["Sleeptime"] = ESP.deepSleepMax();
       Serial.println("Try to send");
       String jsonData;
       serializeJson(doc, jsonData);
