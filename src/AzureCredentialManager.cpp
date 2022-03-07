@@ -7,10 +7,6 @@
 #include <az_core.h>
 #include <az_iot.h>
 
-#define DEVICE_ID "DEV-DEVICE-SBA"
-#define MQTT_SERVER "sba-iot-hub.azure-devices.net"
-#define MQTT_PORT 8883
-
 #define sizeofarray(a) (sizeof(a) / sizeof(a[0]))
 #define AZURE_SDK_CLIENT_USER_AGENT "c/" AZ_SDK_VERSION_STRING "(ard;esp8266)"
 static az_iot_hub_client client;
@@ -62,7 +58,7 @@ String AzureCredentialManager::GenerateSasToken()
     char base64_decoded_device_key[32];
     uint8_t signature[512];
     unsigned char encrypted_signature[32];
-    char *device_key = "vZPo/5wkxOO4SBOzhib6nq2WZ3wOUP2jXSr9Du/Q1PA=";
+    char *device_key =DEVICE_KEY;
 
     az_span signature_span = az_span_create((uint8_t *)signature, sizeof(signature));
     az_span out_signature_span;
