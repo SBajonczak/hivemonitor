@@ -62,10 +62,8 @@ void DeviceManager::GotToSleep()
   }
   // Set the next state into the memory.
   this->SetStateToMemory(STATE_SLEEP_WAKE);
-  Serial.print("Sleep now for ");
-  // Serial.print(ESP.deepSleepMax() * 1000000);
-  Serial.println(" seconds");
-  ESP.deepSleep(ESP.deepSleepMax() * 1000000);
+  Serial.println("Going to deep sleep");
+  ESP.deepSleep(ESP.deepSleepMax());
 }
 
 void DeviceManager::SetStateToMemory(byte value)
@@ -130,7 +128,6 @@ void DeviceManager::ConnectWifi()
     Serial.print(".");
   }
   WiFi.printDiag(Serial);
-
 }
 OperatingStates DeviceManager::GetOperatingState()
 {
