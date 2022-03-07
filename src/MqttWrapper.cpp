@@ -1,27 +1,22 @@
-#include <AsyncMqttClient.h>
 #include "MqttWrapper.h"
 #include "ConfigurationManager.h"
 #include "message.h"
 #include <ArduinoJson.h>
-AsyncMqttClient mqttClient;
+#include "AzureCredentialManager.h"
+
+// Set helper method
+#define MQTT_PACKET_SIZE 1024
+
+#define DEVICE_ID "DEV-DEVICE-SBA"
+#define MQTT_PACKET_SIZE 1024
+#define MQTT_SERVER "sba-iot-hub.azure-devices.net"
+#define MQTT_PORT 8883
 std::vector<Message *> MqttWrapper::messages;
 
+// static X509List cert((const char *)ca_pem);
 void MqttWrapper::onMqttConnect()
 {
-    Serial.println("Connected, sending message");
-    for (Message *msg : MqttWrapper::messages)
-    {
-        char internalTopic[255];
-        strcpy(internalTopic, "devices/");
-        strcat(internalTopic, this->deviceID);
-        strcat(internalTopic, msg->Topic);
-        Serial.print("Topic:");
-        Serial.println(internalTopic);
-        Serial.print("Message:");
-        Serial.println(msg->msg);
-        Serial.println("_____");
-        mqttClient.publish(internalTopic, 0, true, msg->msg.c_str());
-    }
+
     MqttWrapper::messages.empty();
 }
 
@@ -52,46 +47,76 @@ void MqttWrapper::Queue(char *Topic, char *msg)
 
 void MqttWrapper::Queue(char *Topic, String msg)
 {
+    Serial.print("Queue value:");
     Message *data = new Message(Topic, msg);
     Serial.println(data->msg);
+    MqttWrapper::messages.push_back(data);
 }
 
-void MqttWrapper::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
+void MqttWrapper::Setup()
 {
-    Serial.print("MQTT Disconnect Reason: ");
-    Serial.println((int)reason);
+    Serial.println("Set Client");
 }
 
+bool MqttWrapper::IsConnected()
+{
+    return this->connected;
+}
 void MqttWrapper::Send()
 {
-    mqttClient.setServer(ConfigurationManager::getInstance()->GetMqttServer().c_str(), ConfigurationManager::getInstance()->GetMqttPort());
-    String username;
-
-    username += ConfigurationManager::getInstance()->GetMqttServer();
-    username += "/";
-    username += ConfigurationManager::getInstance()->GetMqttUser();//this->deviceID;
-    // username +="/";
-    // username +="HIVE-SENSORS";
-    username += "/?api-version=2018-06-30";
-    
-    Serial.print("using Username: ");
-    Serial.println(username);
-    mqttClient.setClientId(this->deviceID);
-    mqttClient.setCredentials(ConfigurationManager::getInstance()->GetMqttUser().c_str(), "SharedAccessSignature sr=sba-iot-hub.azure-devices.net%2Fdevices%2FBETA-HIVE&sig=k1zj6j5iLqyf7dve54SlzGwRh565%2BAwvgsgy93rzXx8%3D&se=1677847336");
-    mqttClient.onConnect(std::bind(&MqttWrapper::onMqttConnect, this));
-    mqttClient.onDisconnect(std::bind(&MqttWrapper::onMqttDisconnect, this, std::placeholders::_1));
-    mqttClient.connect();
-    // Must be called to gain a connection... think this is a bug in the asyncmqtt lib.
-    while (!mqttClient.connected())
+    if (_client.connected())
     {
-        delay(500);
+        String topic = this->_credentialManager.GetTopicName();
+        Serial.print("Topic: ");
+        Serial.println(topic);
+        _client.publish(topic.c_str(), "Test", false);
+
+        _client.loop();
     }
-    Serial.println("Connected");
 }
 
-MqttWrapper::MqttWrapper(char *deviceID)
+void MqttWrapper::Connect()
 {
+
+    // this->_client.setTrustAnchors(&cert);
+    _client.setBufferSize(MQTT_PACKET_SIZE);
+    _client.setServer(MQTT_SERVER, MQTT_PORT);
+    yield();
+    String sas_Token = this->_credentialManager.GenerateSasToken();
+    Serial.print("Sas:");
+    Serial.println(sas_Token);
+    yield();
+
+    if (sas_Token != "")
+    {
+        String username = this->_credentialManager.GetUserName();
+
+        if (!_client.connected())
+        {
+            yield();
+            Serial.println("Connecting Pubsub client...");
+            yield();
+            if (_client.connect(DEVICE_ID, username.c_str(), sas_Token.c_str()))
+            {
+                Serial.println("Pubsub  Connected");
+            }
+            else
+            {
+
+                // this->connected = false;
+                Serial.print("failed, rc=");
+                Serial.print(_client.state());
+                Serial.println("Pubsub not Connected");
+            }
+        }
+    }
+}
+
+MqttWrapper::MqttWrapper(char *deviceID, PubSubClient client)
+{
+    this->_client = client;
     this->deviceID = deviceID;
+    AzureCredentialManager manager;
 }
 
 MqttWrapper::~MqttWrapper()
