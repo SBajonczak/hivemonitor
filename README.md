@@ -240,3 +240,7 @@ You can do it in platform io with:
 ```
 pio run --target erase 
 ```
+
+# Where do I get the Devices tool
+
+https://github.com/Azure/azure-iot-sdks/releases
