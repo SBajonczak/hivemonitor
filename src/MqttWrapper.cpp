@@ -12,15 +12,6 @@
 #define MQTT_SERVER "sba-iot-hub.azure-devices.net"
 #define MQTT_PORT 8883
 
-// static X509List cert((const char *)ca_pem);
-void MqttWrapper::onMqttConnect()
-{
-
-    MqttWrapper::messages.empty();
-}
-
-
-
 
 void MqttWrapper::Setup()
 {
@@ -31,6 +22,7 @@ bool MqttWrapper::IsConnected()
 {
     return this->connected;
 }
+
 void MqttWrapper::Send(String msg)
 {
     if (_client.connected())

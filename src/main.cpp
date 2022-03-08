@@ -134,7 +134,8 @@ void setup()
       devicemanager.ConnectWifi();
       Serial.println("Normal mode");
       mqtt.Connect();
-
+      // sync Time
+      initializeTime();
       // Measure Battery
       measures.SetLowBattery(batteryProcessor.IsLow());
       measures.SetVoltage(batteryProcessor.getVolt());

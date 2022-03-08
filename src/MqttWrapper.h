@@ -12,7 +12,6 @@ class MqttWrapper
 public:
   MqttWrapper(char *deviceID, PubSubClient client);
   ~MqttWrapper();
-  void onMqttConnect();
   void Queue(String msg);
   void Send(String msg);
   bool IsConnected();
@@ -27,8 +26,6 @@ private:
   char *message;
   char *Topic;
   bool connected;
-  static std::vector<Message *> messages;
-  // static az_iot_hub_client client;
 };
 
 #endif
