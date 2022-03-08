@@ -48,16 +48,14 @@ Actually it was Build and Testet on the following devices
 
 
 ## :notebook:Pre-Requisites
-This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
-
 The following libaries are required:
-
 * [HX711](https://github.com/bogde/HX711)
 * [RunningMedian](https://github.com/RobTillaart/Arduino/tree/master/libraries/RunningMedian)    
-* [Homie-esp8266](https://github.com/marvinroger/homie-esp8266)
 * ArduinoJson@^5.13.4
 * OneWire@^2.3.5
 * DallasTemperature@^3.9.1
+* Azure SDK for C
+
 ## :cactus: Branches
 Here some description about the used branches
 
@@ -102,6 +100,12 @@ I decided to use Compilerflags to configure the port mappings. So you will be ab
 |GPIO_HX711_SCK|The SCK Port for the HX711 device|12 (D6)|
 |GPIO_ONEWIRE_BUS|This will be used for the onewire temperture sensors. It declares the data bus|14 (D5)|
 |GPIO_MAINTENANCE_PIN|The Switch or Button, that tells the System that the hive must not operate. |15 (D8)|
+|USE_SPIFFS|Set this to 0 to use the LittleFS support. The Spiffs is still drprecated||
+|DEVICE_ID|This is the DeviceID. This Device must be the same as in the azre portal.||
+|MQTT_PACKET_SIZE|Ths defines the maximum packet size|1024|
+|MQTT_SERVER|This is the actuall servername||
+|MQTT_PORT|The assoziated port to the mqtt server|8883|
+|DEVICE_KEY|The primary or secondary kea from the azure portal. This will be used, to generate a sas Token for communicating.||
 
 
 ## :rocket: Upload the firmware
