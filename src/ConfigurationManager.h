@@ -2,7 +2,13 @@
 #define ConfigurationManager_h
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#define USE_SPIFFS 0
 #include <FS.h> // Include the SPIFFS library
+#if USE_SPIFFS
+#include <spiffs/spiffs.h>
+#else
+#include <LittleFS.h>
+#endif
 class ConfigurationManager
 {
 
