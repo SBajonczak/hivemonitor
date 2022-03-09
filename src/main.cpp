@@ -1,4 +1,6 @@
 #include <Ticker.h>
+#include <time.h>
+#include <ESP8266WiFi.h>
 #include "WeightProcessor.h"
 #include "TemperatureProcessor.h"
 #include "BatteryProcessor.h"
@@ -8,7 +10,13 @@
 #include "TareUtility.h"
 #include "ConfigWebserver.h"
 #include "MqttWrapper.h"
+#include <PubSubClient.h>
+#include <azure_ca.h>
+#define NTP_SERVERS "pool.ntp.org", "time.nist.gov"
 
+WiFiClientSecure wifi_client;
+X509List cert((const char *)ca_pem);
+PubSubClient mqtt_client(wifi_client);
 
 // Set the Mode for the BAttery measuring
 ADC_MODE(ADC_VCC);
@@ -30,16 +38,28 @@ extern "C"
 int runtime_s = 0;
 Ticker timeout;
 
+// Make thrust connection
+
 TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
 MeasureHandler measures;
 DeviceManager devicemanager;
 ConfigWebserver configServer;
-MqttWrapper mqtt(devicemanager.getDeviceID());
+MqttWrapper mqtt(devicemanager.getDeviceID(), mqtt_client);
 
-void setupHandler()
+static void initializeTime()
 {
-  measures.setup();
+  Serial.print("Setting time using SNTP");
+
+  configTime(-5 * 3600, 0, NTP_SERVERS);
+  time_t now = time(NULL);
+  while (now < 1510592825)
+  {
+    delay(500);
+    Serial.print(".");
+    now = time(NULL);
+  }
+  Serial.println("done!");
 }
 
 void max_run()
@@ -49,7 +69,7 @@ void max_run()
   {
     // Serial.println()  << "DEBUG: Max. runtime of " << RUNTIME_MAX << "s reached, shutting down!" << endl;
     devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
-    //Serial.println()  << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
+    // Serial.println()  << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
     devicemanager.GotToSleep();
     // Homie.prepareToSleep();
   }
@@ -57,36 +77,38 @@ void max_run()
 
 void setup()
 {
-  Serial.begin(115200);
-  if (!ConfigurationManager::getInstance()->HasValidConfiguration())
-  {
 
-    Serial.println("No valid configuration available. Starting configuration mode");
-    configServer.Serve();
-    return;
-  }
+  Serial.begin(115200);
+  mqtt.Setup();
+  wifi_client.setTrustAnchors(&cert);
+
+  // if (!ConfigurationManager::getInstance()->HasValidConfiguration())
+  // {
+
+  //   //   Serial.println("No valid configuration available. Starting configuration mode");
+  //   configServer.Serve();
+  //   // return;
+  // }
+
+  //  ConfigurationManager::getInstance()->ReadSettings();
   // Get the settings
-  ConfigurationManager::getInstance()->ReadSettings();
-  // Homie.disableResetTrigger();
-  // Homie.disableLedFeedback(); // collides with Serial on ESP07
 
   switch (devicemanager.GetOperatingState())
   {
   case OperatingStates::Maintenance:
     Serial.println("Maintenance / Configuration mode");
     configServer.Serve();
-    return;
+    // return;
     break;
   case OperatingStates::Operating:
-    Serial.println("Normal mode");
 
     if (devicemanager.IsColdstart())
     {
-      // Serial.println()  << "DEBUG: Is Coldstart set new initial State" << endl;
       devicemanager.SetStateAndMagicNumberToMemory();
       devicemanager.SetStateToMemory(STATE_COLDSTART);
     }
     devicemanager.ReadStateFromMemory();
+
     switch (devicemanager.GetCurrentState())
     {
     default: // Catch all unknown states
@@ -96,7 +118,7 @@ void setup()
       // Prepare to setup the WIFI
 
       WiFi.forceSleepWake();
-      WiFi.mode(WIFI_STA);
+      // WiFi.mode(WIFI_STA);
       // one more sleep required to to wake with wifi on
       devicemanager.SetStateToMemory(STATE_CONNECT_WIFI);
       devicemanager.GotToSleep(WAKE_RFCAL);
@@ -104,51 +126,60 @@ void setup()
       break;
     case STATE_CONNECT_WIFI:
 
-      temperatures.setup();
       WiFi.forceSleepWake();
-      delay(500);
       // Set modem to sleep
       wifi_set_sleep_type(MODEM_SLEEP_T);
 
+      temperatures.setup();
       devicemanager.ConnectWifi();
+      Serial.println("Normal mode");
+      mqtt.Connect();
+      // sync Time
+      initializeTime();
       // Measure Battery
       measures.SetLowBattery(batteryProcessor.IsLow());
       measures.SetVoltage(batteryProcessor.getVolt());
+
+      DynamicJsonDocument doc(1024);
 
       // Get temperature
       if (temperatures.getDeviceCount() > 0)
       {
         for (int i = 0; i < temperatures.getDeviceCount(); i++)
         {
-          char internalTopic[155];
-          strcpy(internalTopic, "/hive/Temperature/");
-          strcat(internalTopic, String(i).c_str());
-          strcat(internalTopic, "/value");
-          mqtt.Queue(internalTopic, measures.GetTemperaturValue(0));
-          measures.SetTemperatureValue(0, temperatures.getTemperature(0));
+          doc["Temperatures"][i]["Celsius"] = measures.GetTemperaturValue(0);
+          doc["Temperatures"][i]["Index"] = i;
         }
-        mqtt.Queue("/hive/Temperature/connected", 1);
+        doc["Temperatures"]["Connected"] = true;
       }
       else
       {
-        mqtt.Queue("/hive/Temperature/connected", 0);
+        doc["Temperatures"]["Connected"] = false;
         Serial.println("No Temperature Sensors connected");
       }
 
       WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
       if (scaledevice.DeviceReady())
       {
-        mqtt.Queue("/hive/weight/connected", 1);
-        mqtt.Queue("/hive/weight/value", scaledevice.getWeight());
+        doc["weight"]["Connected"] = true;
+        doc["weight"]["value"] = scaledevice.getWeight();
       }
       else
       {
-        mqtt.Queue("/hive/weight/connected", 0);
+        doc["weight"]["Connected"] = false;
         Serial.println("No Scaledevice connected");
       }
-      mqtt.Queue("/hive/battery/volt", batteryProcessor.getVolt());
-      mqtt.Queue("/hive/battery/islow", 1);
-      mqtt.Send();
+      doc["System"]["Battery"]["Volts"] = batteryProcessor.getVolt();
+      doc["System"]["Battery"]["islow"] = measures.GetLowBattery();
+
+      time_t now = time(NULL);
+      doc["System"]["Time"] = ctime(&now);
+      doc["System"]["Sleeptime"] = ESP.deepSleepMax();
+      Serial.println("Try to send");
+      String jsonData;
+      serializeJson(doc, jsonData);
+
+      mqtt.Send(jsonData);
 
       // When the battery is low, it mus sleep forever
       if (measures.GetLowBattery())

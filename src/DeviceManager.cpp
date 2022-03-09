@@ -1,12 +1,12 @@
 #include <DeviceManager.h>
-
 #include "TareUtility.h"
 #include "ConfigurationManager.h"
+#include <ESP8266WiFi.h>
 
 void DeviceManager::setup() {}
-
 char DeviceManager::_deviceId[]; // need to define the static variable
-
+#define WIFI_SSID "Ponyhof"
+#define WIFI_PASSWORD "Tumalonga2411"
 #ifdef ESP32
 void DeviceManager::generateDeviceID()
 {
@@ -55,16 +55,15 @@ void DeviceManager::GotToSleep(WakeMode mode)
 void DeviceManager::GotToSleep()
 {
   int seconds = this->GetSleepTime();
-  if (seconds==0){
+  if (seconds == 0)
+  {
     // Preventing to go to sleep forever.
-    seconds=5;
+    seconds = 5;
   }
   // Set the next state into the memory.
   this->SetStateToMemory(STATE_SLEEP_WAKE);
-  Serial.print("Sleep now for ");
-  Serial.print(seconds * 1000000);
-  Serial.println(" seconds");
-  ESP.deepSleep(seconds * 1000000);
+  Serial.println("Going to deep sleep");
+  ESP.deepSleep(ESP.deepSleepMax());
 }
 
 void DeviceManager::SetStateToMemory(byte value)
@@ -83,14 +82,14 @@ void DeviceManager::SetStateAndMagicNumberToMemory()
   byte buf[2];   //__attribute__((aligned(4)));
   buf[0] = 0x55; // 85
   buf[1] = 0xaa; // 170
-  //set and write the magic number
+  // set and write the magic number
   system_rtc_mem_write(RTC_BASE, buf, 2);
 }
 
 bool DeviceManager::IsColdstart()
 {
   byte buf[2]; // __attribute__((aligned(4)));
-  //set and write the magic number
+  // set and write the magic number
   system_rtc_mem_read(RTC_BASE, buf, 2);
   this->SetStateAndMagicNumberToMemory();
   return (buf[0] != 0x55) || (buf[1] != 0xaa);
@@ -118,9 +117,9 @@ byte DeviceManager::GetCurrentState()
 }
 void DeviceManager::ConnectWifi()
 {
+
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ConfigurationManager::getInstance()->GetWifiSsid(),
-             ConfigurationManager::getInstance()->GetWifiPassword());
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.println("Conecting to wifi");
 
   while (WiFi.status() != WL_CONNECTED)
@@ -128,8 +127,7 @@ void DeviceManager::ConnectWifi()
     delay(500);
     Serial.print(".");
   }
-  Serial.print("Connected. Got IP: ");
-  Serial.println(WiFi.localIP());
+  WiFi.printDiag(Serial);
 }
 OperatingStates DeviceManager::GetOperatingState()
 {

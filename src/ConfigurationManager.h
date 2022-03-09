@@ -1,11 +1,14 @@
-/*
-  StateManager.h - Helper Libary for managing the Homie states.
-*/
 #ifndef ConfigurationManager_h
 #define ConfigurationManager_h
-
-#include <Homie.h>
-
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#define USE_SPIFFS 0
+#include <FS.h> // Include the SPIFFS library
+#if USE_SPIFFS
+#include <spiffs/spiffs.h>
+#else
+#include <LittleFS.h>
+#endif
 class ConfigurationManager
 {
 

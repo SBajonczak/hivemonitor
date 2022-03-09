@@ -1,8 +1,5 @@
 #include <ConfigurationManager.h>
 #include <EEPROM.h> // Reference for Memmory handling
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <FS.h> // Include the SPIFFS library
 #define CONFIG_FILE "/config.json"
 
 // Avoiding compile issues
@@ -11,7 +8,7 @@ ConfigurationManager *ConfigurationManager::instance = nullptr;
 #define JSON_DOCSIZE 1024
 
 const int DEFAULT_SLEEP_TIME = 20;
-/* 
+/*
     Use sketch BeeScale-Calibration.ino to determine these calibration values.
     Set them here or use HomieSetting via config.json or WebApp/MQTT
   */
@@ -20,11 +17,11 @@ const float DEFAULT_KILOGRAM_DIVIDER = 21.59;             // Load cell value per
 const float DEFAULT_CALIBRATION_TEMPERATURE = 23.44;      // Temperature at which the scale has been calibrated for Temperature compensation
 const float DEFAULT_CALIBRATION_FACTOR_GRAM_DEGREE = 0.0; // Calibration factor in gram per degree
 /*
-  * *Some* ESPs tend to have a too low reading on ESP.getVcc()
-  * To get the maximum battery runtime you should check what ADC is reading and compare
-  * it with a multimeter between VCC and GND at the ESP. Change the following value to e.g. 0.13
-  * or -0.02 in case of a too high reading. Or set it using HomieSetting via config.json or WebApp/MQTT
-  */
+ * *Some* ESPs tend to have a too low reading on ESP.getVcc()
+ * To get the maximum battery runtime you should check what ADC is reading and compare
+ * it with a multimeter between VCC and GND at the ESP. Change the following value to e.g. 0.13
+ * or -0.02 in case of a too high reading. Or set it using HomieSetting via config.json or WebApp/MQTT
+ */
 const float DEFAULT_VCC_ADJUST = 0.23;
 
 void ConfigurationManager::setup()
@@ -39,7 +36,7 @@ void ConfigurationManager::setup()
 
 ConfigurationManager::ConfigurationManager()
 {
-  //this->ReadSettings();
+  // this->ReadSettings();
 }
 
 long ConfigurationManager::GetSleepTime()
@@ -87,10 +84,17 @@ String ConfigurationManager::GetJson()
 bool ConfigurationManager::HasValidConfiguration()
 {
   bool exists = false;
+#if USE_SPIFFS
   if (SPIFFS.begin())
   {
     exists = SPIFFS.exists(CONFIG_FILE);
   }
+#else
+  if (LittleFS.begin())
+  {
+    exists = LittleFS.exists(CONFIG_FILE);
+  }
+#endif
   return exists;
 }
 
@@ -137,6 +141,7 @@ void ConfigurationManager::ApplyJsonInput(String json)
 void ConfigurationManager::StoreSettings()
 {
   String json = this->GetJson();
+#if USE_SPIFFS
   if (SPIFFS.begin())
   {
     SPIFFS.remove(CONFIG_FILE);
@@ -147,11 +152,23 @@ void ConfigurationManager::StoreSettings()
       configFile.close();
     }
   }
+#else
+  if (LittleFS.begin())
+  {
+    LittleFS.remove(CONFIG_FILE);
+    File configFile = LittleFS.open(CONFIG_FILE, "w");
+    if (configFile)
+    {
+      configFile.println(json);
+      configFile.close();
+    }
+  }
+#endif
 }
 
 void ConfigurationManager::ReadSettings()
 {
-
+#if USE_SPIFFS
   if (SPIFFS.begin())
   {
     if (SPIFFS.exists(CONFIG_FILE))
@@ -166,4 +183,20 @@ void ConfigurationManager::ReadSettings()
       }
     }
   }
+#else
+  if (LittleFS.begin())
+  {
+    if (LittleFS.exists(CONFIG_FILE))
+    {
+
+      File configFile = LittleFS.open(CONFIG_FILE, "r");
+      if (configFile)
+      {
+        String s = configFile.readString();
+        this->ApplyJsonInput(s);
+        return;
+      }
+    }
+  }
+#endif
 }

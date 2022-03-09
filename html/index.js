@@ -36,10 +36,10 @@ function GetSettings() {
         setTextBoxValue("system_sleeptime", data.system.sleeptime);
         setTextBoxValue("system_vccadjustsetting", data.system.vccadjustsetting);
 
-        setTextBoxValue("mqtt_server", data.mqtt.server);
-        setTextBoxValue("mqtt_user", data.mqtt.user);
-        setTextBoxValue("mqtt_password", data.mqtt.password);
-        setTextBoxValue("mqtt_port", data.mqtt.port);
+        // setTextBoxValue("mqtt_server", data.mqtt.server);
+        // setTextBoxValue("mqtt_user", data.mqtt.user);
+        // setTextBoxValue("mqtt_password", data.mqtt.password);
+        // setTextBoxValue("mqtt_port", data.mqtt.port);
 
         setTextBoxValue("scale_weightoffset", data.scale.weightoffset);
         setTextBoxValue("scale_kilogramdivider", data.scale.kilogramdivider);
@@ -236,12 +236,12 @@ function saveSettings() {
             sleeptime: getTextBoxNumberValue('system_sleeptime'),
             vccadjustsetting: getTextBoxNumberValue('system_vccadjustsetting')
         },
-        mqtt: {
-            server: getTextBoxValue('mqtt_server'),
-            port: getTextBoxNumberValue('mqtt_port'),
-            user: getTextBoxValue('mqtt_user'),
-            password: getTextBoxValue('mqtt_password')
-        },
+        // mqtt: {
+        //     server: getTextBoxValue('mqtt_server'),
+        //     port: getTextBoxNumberValue('mqtt_port'),
+        //     user: getTextBoxValue('mqtt_user'),
+        //     password: getTextBoxValue('mqtt_password')
+        // },
         scale: {
             weightoffset: getTextBoxNumberValue('scale_weightoffset'),
             kilogramdivider: getTextBoxNumberValue('scale_kilogramdivider'),
