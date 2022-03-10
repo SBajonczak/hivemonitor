@@ -29,6 +29,8 @@ char *DeviceManager::getDeviceID()
 
 DeviceManager::DeviceManager(ConfigurationManager config)
 { 
+  // Storing data only in flash
+  WiFi.persistent(false);
   config.ReadSettings();
   this->_config= config;
   ReadStateFromMemory();
@@ -76,8 +78,7 @@ void DeviceManager::GotToSleep()
   Serial.print("Going to deep sleep for ");
   Serial.print(this->_config.GetSleepTime());
   Serial.println(" Minutes");
-
-  ESP.deepSleep((this->_config.GetSleepTime()*1000000* 60)); // max deepsleep 71
+  ESP.deepSleep((this->_config.GetSleepTime()*(1000000* 60))); // max deepsleep 71
 }
 
 void DeviceManager::SetStateToMemory(byte value)
@@ -89,7 +90,6 @@ void DeviceManager::SetStateToMemory(byte value)
 void DeviceManager::SetStateAndMagicNumberToMemory()
 {
   WriteRtcSettings();
-  ;
 }
 
 bool DeviceManager::IsColdstart()

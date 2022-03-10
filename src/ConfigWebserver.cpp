@@ -26,47 +26,48 @@ AsyncCallbackJsonWebHandler *storeConfigHandler = new AsyncCallbackJsonWebHandle
                                                                                     ConfigurationManager::getInstance()->ApplyJsonInput(values);
                                                                                     ConfigurationManager::getInstance()->StoreSettings();
                                                                                     ConfigurationManager::getInstance()->ReadSettings();
-                                                                                    request->send(200);
-                                                                                  });
+                                                                                    request->send(200); });
 
 ConfigWebserver::ConfigWebserver() {}
 ConfigWebserver::~ConfigWebserver() {}
 
+void handleRoot(AsyncWebServerRequest *request)
+{
+}
+
 void ConfigWebserver::Serve()
 {
-  const IPAddress apIP = IPAddress(192, 168, 4, 1);
+  const IPAddress apIP = IPAddress(1, 2, 3, 4);
   static const byte DNS_PORT = 53;
   DNSServer dnsServer;
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(AP_SSIDNAME, AP_PASSWORD);
-  dnsServer.start(DNS_PORT, "*", apIP);
+  WiFi.softAP("HiveMonitor", "");
+  dnsServer.start(DNS_PORT, "HiveMonitor", apIP);
 
   Serial.print("IP Address: ");
   Serial.println(WiFi.softAPIP());
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
-  server.addHandler(storeConfigHandler);
 
+  server.addHandler(storeConfigHandler);
   server.on("/getWeightValue", HTTP_GET, [](AsyncWebServerRequest *request)
             {
               WeightProcessor *scaledevice = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
-
               float offset = scaledevice->getRawWeight();
               Serial.println("Offset");
               Serial.println(offset);
-              request->send(200, "text", String(offset));
-            });
+              request->send(200, "text", String(offset)); });
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
+
               AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
               response->addHeader(F("Cache-Control"), "no-store,max-age=0");
               // Gzip content
               response->addHeader(F("Content-Encoding"), "gzip");
-              request->send(response);
-            });
+              request->send(response); });
 
   server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -75,8 +76,7 @@ void ConfigWebserver::Serve()
               String settings = scaledevice->GetJson();
               Serial.println("Settings: ");
               Serial.println(settings);
-              request->send(200, "application/json", settings);
-            });
+              request->send(200, "application/json", settings); });
 
   server.on("/info", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -85,8 +85,28 @@ void ConfigWebserver::Serve()
               doc["sensors"]["scale"]["connected"]= weightProcessor->DeviceReady();
               String bodyString;
               serializeJson(doc, bodyString);
-              request->send(200, "application/json", bodyString);
-            });
+              request->send(200, "application/json", bodyString); });
+
+  server.on("/generate_204", [](AsyncWebServerRequest *request){
+    Serial.println("generate_204");
+  }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+
+
+  server.on("/favicon.ico", [](AsyncWebServerRequest *request){
+    Serial.println("favicon.ico");
+  }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+  server.on("/fwlink", [](AsyncWebServerRequest *request){
+    Serial.println("fwlink");
+  }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+
+
+  server.onNotFound([](AsyncWebServerRequest *request)
+                    {
+                      
+                      Serial.print("Not found");
+                      AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
+                      response->addHeader(F("Location"), "http://1.2.3.4");
+                      request->send(response); });
 
   server.begin();
 }
