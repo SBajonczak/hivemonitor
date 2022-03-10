@@ -17,7 +17,7 @@
 WiFiClientSecure wifi_client;
 X509List cert((const char *)ca_pem);
 PubSubClient mqtt_client(wifi_client);
-
+ConfigurationManager config;
 // Set the Mode for the BAttery measuring
 ADC_MODE(ADC_VCC);
 
@@ -42,8 +42,8 @@ Ticker timeout;
 
 TemperatureProcessor temperatures(GPIO_ONEWIRE_BUS);
 BatteryProcessor batteryProcessor;
-MeasureHandler measures;
-DeviceManager devicemanager;
+MeasureHandler measures(config);
+DeviceManager devicemanager(config);
 ConfigWebserver configServer;
 MqttWrapper mqtt(devicemanager.getDeviceID(), mqtt_client);
 
@@ -62,36 +62,13 @@ static void initializeTime()
   Serial.println("done!");
 }
 
-void max_run()
-{
-  ++runtime_s;
-  if (runtime_s == RUNTIME_MAX)
-  {
-    // Serial.println()  << "DEBUG: Max. runtime of " << RUNTIME_MAX << "s reached, shutting down!" << endl;
-    devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
-    // Serial.println()  << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
-    devicemanager.GotToSleep();
-    // Homie.prepareToSleep();
-  }
-}
-
 void setup()
 {
 
   Serial.begin(115200);
+  Serial.println("Trigger Setup");
   mqtt.Setup();
   wifi_client.setTrustAnchors(&cert);
-
-  // if (!ConfigurationManager::getInstance()->HasValidConfiguration())
-  // {
-
-  //   //   Serial.println("No valid configuration available. Starting configuration mode");
-  //   configServer.Serve();
-  //   // return;
-  // }
-
-  //  ConfigurationManager::getInstance()->ReadSettings();
-  // Get the settings
 
   switch (devicemanager.GetOperatingState())
   {
@@ -104,7 +81,10 @@ void setup()
 
     if (devicemanager.IsColdstart())
     {
+      Serial.println("Coldstart Initiated");
       devicemanager.SetStateAndMagicNumberToMemory();
+      Serial.println("Set state to STATE_COLDSTART");
+
       devicemanager.SetStateToMemory(STATE_COLDSTART);
     }
     devicemanager.ReadStateFromMemory();
@@ -115,24 +95,29 @@ void setup()
     case STATE_SLEEP_WAKE:
       // first run after power on - initializes
     case STATE_COLDSTART:
+      Serial.println("Now in state to STATE_COLDSTART");
       // Prepare to setup the WIFI
 
       WiFi.forceSleepWake();
       // WiFi.mode(WIFI_STA);
       // one more sleep required to to wake with wifi on
+      Serial.println("Set state to STATE_CONNECT_WIFI");
       devicemanager.SetStateToMemory(STATE_CONNECT_WIFI);
-      devicemanager.GotToSleep(WAKE_RFCAL);
+      devicemanager.GotToSleepForWirelesWakeUp(WAKE_RFCAL);
 
       break;
     case STATE_CONNECT_WIFI:
-
+      Serial.println("Now in state to STATE_CONNECT_WIFI");
       WiFi.forceSleepWake();
       // Set modem to sleep
       wifi_set_sleep_type(MODEM_SLEEP_T);
 
       temperatures.setup();
+     
       devicemanager.ConnectWifi();
-      Serial.println("Normal mode");
+      // Connect to the server externally, because pubsubclient has some major problems when do it internal
+      int result = wifi_client.connect(MQTT_SERVER, MQTT_PORT);
+      //Connecting to the mqtt server
       mqtt.Connect();
       // sync Time
       initializeTime();
@@ -140,7 +125,7 @@ void setup()
       measures.SetLowBattery(batteryProcessor.IsLow());
       measures.SetVoltage(batteryProcessor.getVolt());
 
-      DynamicJsonDocument doc(1024);
+      DynamicJsonDocument doc(MQTT_PACKET_SIZE);
 
       // Get temperature
       if (temperatures.getDeviceCount() > 0)
@@ -188,7 +173,7 @@ void setup()
       }
       else
       {
-        devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
+        devicemanager.SetSleepTime(config.GetSleepTime());
       }
 
       WiFi.forceSleepBegin(); // send wifi directly to sleep to reduce power consumption
