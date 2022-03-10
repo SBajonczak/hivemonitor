@@ -11,7 +11,7 @@ class MeasureHandler
 public:
   void setupHandler();
 
-  MeasureHandler();
+  MeasureHandler(ConfigurationManager config);
 
   void SetWeightValue(float weightValue);
   void SetTemperatureValue(int index, float temperature);
@@ -24,7 +24,7 @@ public:
   float GetWeightValue();
 
 private:
-  ConfigurationManager *configurationManager;
+  ConfigurationManager configurationManager;
   int id;
   float weight;
   float voltage;

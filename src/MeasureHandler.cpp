@@ -2,15 +2,17 @@
 #include "WeightProcessor.h"
 
 /*
-  * Scale should be calibrated with a regulated input of 3.3V!
-  * Every change during runtime will cause wrong readings
-  */
+ * Scale should be calibrated with a regulated input of 3.3V!
+ * Every change during runtime will cause wrong readings
+ */
 const float LOW_BATTERY = 1.1;
 
-MeasureHandler::MeasureHandler()
+MeasureHandler::MeasureHandler(ConfigurationManager config)
 {
-  this->configurationManager = ConfigurationManager::getInstance();
-  this->configurationManager->setup();
+  config.ReadSettings();
+  this->configurationManager = config;
+
+  //  this->configurationManager->setup();
 }
 
 void MeasureHandler::setupHandler()
@@ -24,10 +26,10 @@ void MeasureHandler::SetWeightValue(float weightValue)
   WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
   Serial.println("DEBUG: Scale class initalized!");
   scaledevice.setup(
-      this->configurationManager->GetKilogramDivider(),
-      this->configurationManager->GetWeightOffset(),
-      this->configurationManager->GetCalibrationTemperatureSetting(),
-      this->configurationManager->GetCalibrationFactorSetting());
+      this->configurationManager.GetKilogramDivider(),
+      this->configurationManager.GetWeightOffset(),
+      this->configurationManager.GetCalibrationTemperatureSetting(),
+      this->configurationManager.GetCalibrationFactorSetting());
   if (scaledevice.DeviceReady())
   {
     Serial.println("DEBUG: Try to get scale value!");
@@ -75,7 +77,6 @@ float MeasureHandler::GetTemperaturValue(int index)
   }
   return 0;
 }
-
 
 void MeasureHandler::SetVoltage(float voltage)
 {
