@@ -5,6 +5,8 @@
 #define DeviceManager_h
 #include "WeightProcessor.h"
 #include <Arduino.h>
+#include <ConfigurationManager.h>
+
 // The Memmory Adress for the state
 #define RTC_STATE 66
 #define RTC_BASE 65
@@ -23,9 +25,18 @@ enum OperatingStates
 class DeviceManager
 {
 
+  struct
+  {
+    uint32_t crc32;     // 4 bytes
+    uint8_t channel;    // 1 byte,   5 in total
+    uint8_t bssid[6];   // 6 bytes, 11 in total
+    uint8_t padding;    // 1 byte,  12 in total
+    byte state;         // 2 byte
+  } rtcData;
+
 public:
   void setup();
-  DeviceManager();
+  DeviceManager(ConfigurationManager config);
   // Set the Sleeptime in Seconds
   void SetSleepTime(int time);
   // Get the sleeptime in Seconds
@@ -33,12 +44,12 @@ public:
   // Do some Setup
   void Setup();
 
-  /* 
-    Sets the ESP Device to sleep, it convert the sleeptime autmatically into ms. 
+  /*
+    Sets the ESP Device to sleep, it convert the sleeptime autmatically into ms.
     It will also set the next state for the wakeup process.
   */
   void GotToSleep();
-  void GotToSleep(WakeMode mode);
+  void GotToSleepForWirelesWakeUp(WakeMode mode);
   byte ReadStateFromMemory();
   void SetStateToMemory(byte value);
   void SetStateAndMagicNumberToMemory();
@@ -47,14 +58,24 @@ public:
   byte GetCurrentState();
   // Get the actual Operating State
   OperatingStates GetOperatingState();
+  void WriteRtcSettings();
+  uint32_t calculateCRC32(const uint8_t *data, size_t length);
   void ConnectWifi();
   char *getDeviceID();
 
 private:
-   static char _deviceId[15];
+
+  void SetMacAdress();
+
+  static char _deviceId[15];
   void generateDeviceID();
+  ConfigurationManager _config;
   OperatingStates operatingState;
   int SleepTime;
   byte CurrentState;
+  bool RtcReadSuccess;
+  // IPAddress staticAdress;
+  // IPAddress gateway;
+  // IPAddress subnet;
 };
 #endif
