@@ -7,7 +7,7 @@ ConfigurationManager *ConfigurationManager::instance = nullptr;
 
 #define JSON_DOCSIZE 1024
 
-const int DEFAULT_SLEEP_TIME = 20;
+const int DEFAULT_SLEEP_TIME = UINT32_MAX;
 /*
     Use sketch BeeScale-Calibration.ino to determine these calibration values.
     Set them here or use HomieSetting via config.json or WebApp/MQTT
@@ -93,6 +93,12 @@ bool ConfigurationManager::HasValidConfiguration()
   if (LittleFS.begin())
   {
     exists = LittleFS.exists(CONFIG_FILE);
+  }
+  ReadSettings();
+  if (this->WifiSsid == "" || this->WifiPassword == "")
+  {
+    Serial.println("Missing WIFI Settings");
+    return false;
   }
 #endif
   return exists;
