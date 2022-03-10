@@ -116,7 +116,7 @@ void setup()
      
       devicemanager.ConnectWifi();
       // Connect to the server externally, because pubsubclient has some major problems when do it internal
-      int result = wifi_client.connect(MQTT_SERVER, MQTT_PORT);
+      wifi_client.connect(MQTT_SERVER, MQTT_PORT);
       //Connecting to the mqtt server
       mqtt.Connect();
       // sync Time
