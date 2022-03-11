@@ -78,7 +78,7 @@ void DeviceManager::GotToSleep()
   Serial.print("Going to deep sleep for ");
   Serial.print(this->_config.GetSleepTime());
   Serial.println(" Minutes");
-  ESP.deepSleep((this->_config.GetSleepTime()*(1000000* 60))); // max deepsleep 71
+  ESP.deepSleep(this->_config.GetSleepTime()*60000000); // max deepsleep 71
 }
 
 void DeviceManager::SetStateToMemory(byte value)

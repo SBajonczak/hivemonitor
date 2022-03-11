@@ -158,6 +158,7 @@ void setup()
       doc["System"]["Battery"]["islow"] = measures.GetLowBattery();
 
       time_t now = time(NULL);
+      doc["System"]["DeviceID"] =WiFi.macAddress();
       doc["System"]["Time"] = ctime(&now);
       doc["System"]["Sleeptime"] = ESP.deepSleepMax();
       Serial.println("Try to send");
