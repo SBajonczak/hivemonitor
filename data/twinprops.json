@@ -1,0 +1,14 @@
+{
+    "@id": "dtmi:beehive:mon:hivemonitor;1",
+    "@context": "dtmi:dtdl:context;2",
+    "@type": "Interface",
+    "displayName": "Hivemonitor",
+    "contents": [
+      {
+        "@type": "Property",
+        "name": "Weight",
+        "schema": "float",
+        "writable": true
+      }
+    ]
+  }
