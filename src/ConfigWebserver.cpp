@@ -54,8 +54,10 @@ void ConfigWebserver::Serve()
   server.addHandler(storeConfigHandler);
   server.on("/getWeightValue", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-              WeightProcessor *scaledevice = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
-              float offset = scaledevice->getRawWeight();
+                            ConfigurationManager config;
+
+              WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK,config);
+              float offset = scaledevice.getRawWeight();
               Serial.println("Offset");
               Serial.println(offset);
               request->send(200, "text", String(offset)); });
@@ -80,25 +82,21 @@ void ConfigWebserver::Serve()
 
   server.on("/info", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-              WeightProcessor *weightProcessor = WeightProcessor::getInstance(GPIO_HX711_DT, GPIO_HX711_SCK);
+              ConfigurationManager config;
+              WeightProcessor weightProcessor(GPIO_HX711_DT, GPIO_HX711_SCK, config);
               DynamicJsonDocument doc(512);
-              doc["sensors"]["scale"]["connected"]= weightProcessor->DeviceReady();
+              doc["sensors"]["scale"]["connected"]= weightProcessor.DeviceReady();
               String bodyString;
               serializeJson(doc, bodyString);
               request->send(200, "application/json", bodyString); });
 
-  server.on("/generate_204", [](AsyncWebServerRequest *request){
-    Serial.println("generate_204");
-  }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+  server.on("/generate_204", [](AsyncWebServerRequest *request)
+            { Serial.println("generate_204"); }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
 
-
-  server.on("/favicon.ico", [](AsyncWebServerRequest *request){
-    Serial.println("favicon.ico");
-  }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
-  server.on("/fwlink", [](AsyncWebServerRequest *request){
-    Serial.println("fwlink");
-  }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
-
+  server.on("/favicon.ico", [](AsyncWebServerRequest *request)
+            { Serial.println("favicon.ico"); }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+  server.on("/fwlink", [](AsyncWebServerRequest *request)
+            { Serial.println("fwlink"); }); // Android captive portal. Maybe not needed. Might be handled by notFound handler.
 
   server.onNotFound([](AsyncWebServerRequest *request)
                     {

@@ -13,7 +13,6 @@ public:
 
   MeasureHandler(ConfigurationManager config);
 
-  void SetWeightValue(float weightValue);
   void SetTemperatureValue(int index, float temperature);
   void SetVoltage(float voltage);
   float GetVoltage();

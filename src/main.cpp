@@ -113,11 +113,13 @@ void setup()
       wifi_set_sleep_type(MODEM_SLEEP_T);
 
       temperatures.setup();
-     
+
       devicemanager.ConnectWifi();
       // Connect to the server externally, because pubsubclient has some major problems when do it internal
       wifi_client.connect(MQTT_SERVER, MQTT_PORT);
-      //Connecting to the mqtt server
+
+      config.ReadSettings();
+      // Connecting to the mqtt server
       mqtt.Connect();
       // sync Time
       initializeTime();
@@ -142,12 +144,16 @@ void setup()
         doc["Temperatures"]["Connected"] = false;
         Serial.println("No Temperature Sensors connected");
       }
-
-      WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
+      
+      WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK, config);
       if (scaledevice.DeviceReady())
       {
         doc["weight"]["Connected"] = true;
         doc["weight"]["value"] = scaledevice.getWeight();
+        doc["weight"]["GetKilogramDivider"] = config.GetKilogramDivider();
+        doc["weight"]["GetWeightOffset"] = config.GetWeightOffset();
+        doc["weight"]["GetCalibrationTemperatureSetting"] = config.GetCalibrationTemperatureSetting();
+        doc["weight"]["GetCalibrationFactorSetting"] = config.GetCalibrationFactorSetting();
       }
       else
       {
@@ -158,7 +164,7 @@ void setup()
       doc["System"]["Battery"]["islow"] = measures.GetLowBattery();
 
       time_t now = time(NULL);
-      doc["System"]["DeviceID"] =WiFi.macAddress();
+      doc["System"]["DeviceID"] = WiFi.macAddress();
       doc["System"]["Time"] = ctime(&now);
       doc["System"]["Sleeptime"] = ESP.deepSleepMax();
       Serial.println("Try to send");

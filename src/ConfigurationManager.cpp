@@ -126,9 +126,13 @@ void ConfigurationManager::ApplyJsonInput(String json)
 {
   DynamicJsonDocument jData(2048);
   deserializeJson(jData, json);
+  Serial.print("Config Kilogram Divider");
+  Serial.println(jData["scale"]["weightoffset"].as<float>());
+  Serial.print("Config Kilogram Divider");
+  Serial.println(jData["scale"]["kilogramdivider"].as<float>());
 
-  this->WeightOffset = jData["scale"]["weightoffset"];
-  this->KilogramDivider = jData["scale"]["kilogramdivider"];
+  this->WeightOffset = jData["scale"]["weightoffset"].as<float>();
+  this->KilogramDivider = jData["scale"]["kilogramdivider"].as<float>();
   this->CalibrationTemperatureSetting = jData["scale"]["calibrationtemperaturesetting"];
   this->CalibrationFactorSetting = jData["scale"]["calibrationfactorsetting"];
 

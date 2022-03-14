@@ -19,30 +19,6 @@ void MeasureHandler::setupHandler()
 {
 }
 
-void MeasureHandler::SetWeightValue(float weightValue)
-{
-  Serial.println("DEBUG: Scale class initalized!");
-
-  WeightProcessor scaledevice(GPIO_HX711_DT, GPIO_HX711_SCK);
-  Serial.println("DEBUG: Scale class initalized!");
-  scaledevice.setup(
-      this->configurationManager.GetKilogramDivider(),
-      this->configurationManager.GetWeightOffset(),
-      this->configurationManager.GetCalibrationTemperatureSetting(),
-      this->configurationManager.GetCalibrationFactorSetting());
-  if (scaledevice.DeviceReady())
-  {
-    Serial.println("DEBUG: Try to get scale value!");
-    this->weight = scaledevice.getWeight(0);
-    Serial.println("Got Weight value!");
-  }
-  else
-  {
-    this->weight = -127;
-    Serial.println("Scale not ready!");
-  }
-}
-
 void MeasureHandler::SetLowBattery(bool isLow)
 {
   this->lowBattery = isLow;
