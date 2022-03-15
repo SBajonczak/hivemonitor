@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+		<meta charset="utf-8">
+		<meta name="theme-color" content="#222222">
+		<meta content="yes" name="apple-mobile-web-app-capable">
+		<title>Hive-Monitor</title>
+		<script src="index.js"></script>
+		<style>
+			@import url("index.css");
+		</style>
+	</head>
+
+	<body onload="onLoad()" style="background-color: #D9D4C1">
+		<div class="container mx-auto px-6 py-8">
+			<div class="grid grid-cols-1">
+				<div id="cv" style="display: none;" class="overlay">Load Hive Monitor UI...</div>
+				<noscript>
+					<div class="overlay" style="opacity:1;">Sorry, Hive Monitor needs JavaScript!</div>
+				</noscript>
+
+				<div class="container" style="font-weight:bolder">
+					<ul class="flex text-gray-500 text-sm lg:text-base">
+						<li class="inline-flex items-center">
+							<a href="/">Home</a>
+							<svg class="h-5 w-auto text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+							</svg>
+						</li>
+						<li class="inline-flex items-center">
+							<a href="#" class="text-teal-400" id="pl"></a>
+						</li>
+					</ul>
+				</div>
+
+				<div id="welcome" class="grid bg-white rounded-lg shadow-sm p-1 mt-1">
+					<p class="font-bold">Thank you ❤ for installing the Hivemonitor Software. 👍</p>
+					<p>You have enabled the Settings Mode. In this Webinterface you will be able to set your configs.
+					</p>
+					<p>For suggestions and Bugs please go to my <a
+							href="https://github.com/SBajonczak/hivemonitor">Github project</a></p>
+				</div>
+
+
+				<div id="cTareStep0" style="display: none;">
+					<div class="container" style="font-weight:bold">
+						<div id="welcome" class="grid bg-white rounded-lg shadow-sm p-1 mt-1">
+							<p class="font-bold">Let's start to adjust the scale device ⚖ for you </p>
+							<p>You will be guided throught 3 steps.</p>
+							</br>
+							<div id="tareStep1">
+								<p>First Step Remove all weight from the scale and click "Start".</p>
+							</div>
+							<div id="measuring" style="display: none;">
+								<span id="measuringMessage">Measuring! Please wait...</span>
+							</div>
+							</br>
+
+							<div id="tareStep2" style="display: none;">
+								<p>Place a weight of 1 (one) Kilogram on to the scale device and click on "Start"</p>
+							</div>
+
+						</div>
+
+						<p></p>
+						<button id="btnTare" onclick="toggleIndex()">
+							<p class="tab-label">Go Back</p>
+						</button>
+
+						<button id="btnTare"
+							class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded col-span-2"
+							onclick="startTare()">
+							<p class="tab-label">Start</p>
+						</button>
+
+					</div>
+				</div>
+
+
+
+
+
+				<div id="cSettings" class="container grid grid-cols-2">
+					<span
+						class="bg-yellow-600 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">Settings</span>
+
+
+					<span
+						class="bg-yellow-300 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">System</span>
+					<div>
+						<span class="font-bold text-md m-1">Sleeptime (in sec.)</span>
+						</p>
+						<span class="m-1">The sleep time in seconds.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="system_sleeptime">
+
+					<div>
+						<span class="font-bold text-md m-1">VCC adjustment</span>
+						</p>
+						<span class="m-1">The device measures the voltage. Sometimes it requires some adjustments to
+							gain the perfect measure.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="system_vccadjustsetting">
+
+
+					<span
+						class="bg-yellow-300 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">Wifi</span>
+					<div>
+						<span class="font-bold text-md m-1">SSID</span>
+						</p>
+						<span class="m-1">The SSID for connecting.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="wireles_ssid">
+					<div>
+						<span class="font-bold text-md m-1">Password</span></p>
+						<span class="m-1">The Password to login onto the wifi network.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="wireles_password">
+					<span
+						class="bg-yellow-300 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">Scale</span>
+					<div>
+						<span class="font-bold text-md m-1">Weight Offset</span></p>
+						<span class="m-1">The "zero value" for the weight device.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="scale_weightoffset">
+					<div>
+						<span class="font-bold text-md m-1">Kilogram Divider</span></p>
+						<span class="m-1">The value for "one Kilogram".</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="scale_kilogramdivider">
+					<div>
+						<span class="font-bold text-md m-1">Calibration Temperature</span></p>
+						<span class="m-1">This is the measured temperature during the calibration process.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="scale_calibrationtemperaturesetting">
+					<div>
+						<span class="font-bold text-md m-1">Calibration Factor</span></p>
+						<span class="m-1">This is the calibartion factor for the scale device.</span>
+					</div>
+					<input class="p-1 font-bold m-1 border rounded-lg" id="scale_calibrationfactorsetting">
+
+					<span class="font-bold text-md m-1 col-span-2" style="display: none;" id="scaleNotConnected">There
+						is no device connected!</span>
+					<button id="btnStartTare"
+						class="col-span-2 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
+						onclick="toogleAutoTare()">
+						<p class="tab-label">Adjust Scale</p>
+					</button>
+
+
+					<div class="col-span-2">&nbsp;</div>
+					<button id="btnTare"
+						class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded col-span-2"
+						onclick="saveSettings()">
+						<p class="tab-label">Save Settings</p>
+					</button>
+
+				</div>
+
+				<div class="relative py-3 pl-4 pr-10 leading-normal text-red-700 bg-red-100 rounded-lg" id="toastError"
+					style="display: none;" role="alert">
+					<p id="toastErrorText"></p>
+					<span class="absolute inset-y-0 right-0 flex items-center mr-4">
+						<svg class="w-4 h-4 fill-current" role="button" viewBox="0 0 20 20">
+						</svg>
+					</span>
+				</div>
+
+				<div class="relative py-3 pl-4 pr-10 leading-normal bg-green-100 rounded-lg" id="toastSuccess"
+					style="display: none;" role="alert">
+					<p id="toastSuccessText"></p>
+					<span class="absolute inset-y-0 right-0 flex items-center mr-4">
+						<svg class="w-4 h-4 fill-current" role="button" viewBox="0 0 20 20">
+
+						</svg>
+					</span>
+				</div>
+
+
+			</div>
+		</div>
+	</body>
+
+</html>

@@ -1,4 +1,3 @@
-#include <Homie.h>
 #include "BatteryProcessor.h"
 
 float adjust;

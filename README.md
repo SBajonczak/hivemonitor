@@ -8,6 +8,7 @@
   - [Configured Platforms](#configured_platforms)
   - [Development](#package-development)
   - [Pre-Requisites](#notebook-pre-Requisites)
+  - [Branches](#cactus-branches)
 - [Development Environment](#nut_and_bolt-development_environment)
   - [Build the Firmware](#hammer-build_the_firmware)
   - [Upload firmware](#rocket-upload_the__firmware)
@@ -47,16 +48,21 @@ Actually it was Build and Testet on the following devices
 
 
 ## :notebook:Pre-Requisites
-This Software is based on the [Homie for ESP8266](https://github.com/marvinroger/homie-esp8266) Framework.
-
 The following libaries are required:
-
 * [HX711](https://github.com/bogde/HX711)
 * [RunningMedian](https://github.com/RobTillaart/Arduino/tree/master/libraries/RunningMedian)    
-* [Homie-esp8266](https://github.com/marvinroger/homie-esp8266)
 * ArduinoJson@^5.13.4
 * OneWire@^2.3.5
 * DallasTemperature@^3.9.1
+* Azure SDK for C
+
+## :cactus: Branches
+Here some description about the used branches
+
+|Branch|Description|
+|-|-|
+|master|This contains the latest stable version|
+|development|In this branch, I will put every development work for now. This branch is __NOT__ stable|
 
 
 # :nut_and_bolt: Development Environment
@@ -72,6 +78,35 @@ You can Build your firmware very easyly with the following command:
 ```bash
 make build-complete
 ```
+
+## Environments
+
+I created two environments. 
+
+* esp12e/minimal
+* esp12e/complete
+
+The minimal enviroments reduce the image size.
+
+This will be done by setting the compilerflags for the Homie Framework see [here](https://homieiot.github.io/homie-esp8266/docs/3.0.0/advanced-usage/compiler-flags/) for more info about this. 
+
+## Using Compilerflags
+
+I decided to use Compilerflags to configure the port mappings. So you will be able to modifie the used ports by modifying the flags instead in the source. 
+
+|Flag|Description|Default|
+|-|-|-|
+|GPIO_HX711_DT|The DT Port for the HX711 device|13 (D7)|
+|GPIO_HX711_SCK|The SCK Port for the HX711 device|12 (D6)|
+|GPIO_ONEWIRE_BUS|This will be used for the onewire temperture sensors. It declares the data bus|14 (D5)|
+|GPIO_MAINTENANCE_PIN|The Switch or Button, that tells the System that the hive must not operate. |15 (D8)|
+|USE_SPIFFS|Set this to 0 to use the LittleFS support. The Spiffs is still drprecated||
+|DEVICE_ID|This is the DeviceID. This Device must be the same as in the azre portal.||
+|MQTT_PACKET_SIZE|Ths defines the maximum packet size|1024|
+|MQTT_SERVER|This is the actuall servername||
+|MQTT_PORT|The assoziated port to the mqtt server|8883|
+|DEVICE_KEY|The primary or secondary kea from the azure portal. This will be used, to generate a sas Token for communicating.||
+
 
 ## :rocket: Upload the firmware
 After a successfull build you can upload it to your connected device with: 
@@ -111,8 +146,12 @@ I Ordered the following parts from my local seller
 * 1 x TP4056
 
 ## Wiring Schema
-Together you can wire it up lik this schematic circuit:
-![Circuit](./wiring.png)
+To wire it up, you can follow this schematic design
+
+![Circuit](./Distribution/V1/Schematic.png)
+
+If you want, you can order a PCB by this design. 
+You will find it [here](./Distribution/V1/Gerber_PCB_Hivemonitor_V1.zip)
 
 ## Wiring H30A to HX711
 
@@ -120,62 +159,65 @@ I was sometimes confused about the wiring of the loadcell to the HX711. So I dec
 
 [Wiring](./h30A_hx711.png)
 
-
 # Configuration 
 The Configuration is done with an json file. An example of it looks like this:
 
 ```json
 {
-	"wifi":	{
-		"ssid": "SSID",
-		"password": "mysecret"
-	},
-	"mqtt":	{
-		"host": "192.168.178.55",
-		"port": 1886,
-		"base_topic": "",
-		"auth": true,
-		"username": "username",
-		"password": "password"
-	},
-	"name":"hive-teststand",
-	"ota": {
-		"enabled":false
-	},
-	"device_id":"hive-teststand",
-	"settings": {
-		"sleepTime": 3600,
-    	"sendInterval": 320,
-        "weightOffset": 244017.00,
-        "kilogramDivider": 22.27
-  	}
+    "system": {
+        "sleeptime": 2,
+        "vccadjustsetting": 0
+    },
+    "scale": {
+        "weightoffset": 0,
+        "kilogramdivider": 0,
+        "calibrationtemperaturesetting": 0,
+        "calibrationfactorsetting": 0
+    },
+    "wifi": {
+        "ssid": "",
+        "password": "33"
+    },
+    "mqtt": {
+        "server": "kjkhj",
+        "port": 0,
+        "user": "null",
+        "password": "null"
+    }
+
 }
+
+You can set and read the configuration when you use the maintenance mode.
+
 ```
 The following table will give you more insights about the settings.
 
-
-|Setting|Description|
-|-|-|
-|wifi.sid|the wifis name.|
-|wifi.password|The password for the wifi|
-|mqtt.host|The host for the mqtt. This can be a dns name or a ip address.|
-|mqtt.port|The Mqtt Port.|
-|mqtt.base_topic|If there is a prefix required for a topic, then you can set here the basetopic.|
-|mqtt.auth|__true__ when using authentication, or __false__ when not using it|
-|mqtt.username|The username when authentication is configured.|
-|mqtt.password|The password when authentication is configured.|
-|name|This is the device name. This will shown up in the router later|
-|ota.enabled|__true__ to enable _o_ver _t_he _a_ir update.|
-|device_id|The device ID, possible the same as name.|
-|settings.sleepTime|The Sleepingtime in seconds|
-|settings.sendInterval|The intervall to send, the sleep time will be different. When you have a send intervall from 60 seconds and a weight intervall of 90 seconds it will take 2 rounds of wake up|
-|settings.weightOffset|The weight offset. This is neccessary for the adjustment of the weightcell. Because there are some base weights.|
-|settings.kilogramDivider|The divider to get the kilograms.|
+|Group|Setting|Description|
+|-|-|-|
+|system|sleeptime|The Sleepingtime in seconds|
+|system|vccadjustsetting|This setting adjusting the battery monitor.|
+|wireles|ssid|The wifi SSID.|
+|wireles|password|The password to authenticate.|
+|scale|weightoffset|This is the offset to Tare the 0 value. When no weight is placed.|
+|scale|kilogramdivider|This is the Raw value, to divide the kilogram value out.|
+|scale|calibrationtemperaturesetting|This is the measured temperatur when the intial adjust was done. This will later be used, to compensate the weight differences due to the temparture.|
+|scale|calibrationfactorsetting|This will be the calibarion factor. Calculated ba the autotare function.|
+|mqtt|server|The host for the mqtt. This can be a dns name or a ip address.|
+|mqtt|port|The Mqtt Port.|
+|mqtt|user|The username when authentication is configured.|
+|mqtt|password|The password when authentication is configured.|
 
 
-## Upload_Configuration
+## Modify Configuration
+When you activated the maintenance mode, you will be able to connect to the device. 
+Since you have been connected, you can navigate to the device IP an it will show you the configuration Interface. 
+
+![image](https://user-images.githubusercontent.com/18240989/128514097-10bd2ed1-f1f3-416f-a3c6-4e475e7a31b6.png)
+
+
+
+## Upload Predefined Configuration
 After you modified the configuration to your setting, you can upload this to your device.
-
 ```bash
  make upload-config
 ```
@@ -187,8 +229,22 @@ For future Releases I planning to improve some thing and extend it with the foll
 
 * Support Lora
 * Adding custom Webinterface to Configure the Device within the wireles connection
-* Adding Maintenance Mode
-(Especcially when you work at the bees)
+* ~~Adding Maintenance Mode
+(Especcially when you work at the bees)~~ DONE
 
 
 Feel free to suggest me more Features.
+
+# FAQ
+
+# My device does not start the AP mode
+In this case you must erase the complete flash memmory of your device. 
+You can do it in platform io with: 
+
+```
+pio run --target erase 
+```
+
+# Where do I get the Devices tool
+
+https://github.com/Azure/azure-iot-sdks/releases

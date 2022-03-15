@@ -1,9 +1,6 @@
-/*
-  Temperatures.h - Lib for gtting weights 
-*/
 #ifndef BatteryProcessor_H
 #define BatteryProcessor_H
-
+#include <Arduino.h>
 #define BATT_WARNING_VOLTAGE 3.2  // Voltage for Low-Bat warning
 /*
   * Scale should be calibrated with a regulated input of 3.3V!

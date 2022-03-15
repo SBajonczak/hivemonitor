@@ -3,11 +3,11 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-
 .idea
 .venv*
+.vscode
 
-
+data/ui_out
 # Created by https://www.gitignore.io/api/c++,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=c++,visualstudio,visualstudiocode
 
