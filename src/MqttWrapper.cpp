@@ -77,7 +77,6 @@ MqttWrapper::MqttWrapper(char *deviceID, PubSubClient client)
 {
     this->_client = client;
     this->deviceID = deviceID;
-    AzureCredentialManager manager;
 }
 
 MqttWrapper::~MqttWrapper()

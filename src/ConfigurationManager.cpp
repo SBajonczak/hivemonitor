@@ -7,7 +7,7 @@ ConfigurationManager *ConfigurationManager::instance = nullptr;
 
 #define JSON_DOCSIZE 1024
 
-const int DEFAULT_SLEEP_TIME = 20;
+const int DEFAULT_SLEEP_TIME = UINT32_MAX;
 /*
     Use sketch BeeScale-Calibration.ino to determine these calibration values.
     Set them here or use HomieSetting via config.json or WebApp/MQTT
@@ -94,6 +94,12 @@ bool ConfigurationManager::HasValidConfiguration()
   {
     exists = LittleFS.exists(CONFIG_FILE);
   }
+  ReadSettings();
+  if (this->WifiSsid == "" || this->WifiPassword == "")
+  {
+    Serial.println("Missing WIFI Settings");
+    return false;
+  }
 #endif
   return exists;
 }
@@ -120,9 +126,13 @@ void ConfigurationManager::ApplyJsonInput(String json)
 {
   DynamicJsonDocument jData(2048);
   deserializeJson(jData, json);
+  Serial.print("Config Kilogram Divider");
+  Serial.println(jData["scale"]["weightoffset"].as<float>());
+  Serial.print("Config Kilogram Divider");
+  Serial.println(jData["scale"]["kilogramdivider"].as<float>());
 
-  this->WeightOffset = jData["scale"]["weightoffset"];
-  this->KilogramDivider = jData["scale"]["kilogramdivider"];
+  this->WeightOffset = jData["scale"]["weightoffset"].as<float>();
+  this->KilogramDivider = jData["scale"]["kilogramdivider"].as<float>();
   this->CalibrationTemperatureSetting = jData["scale"]["calibrationtemperaturesetting"];
   this->CalibrationFactorSetting = jData["scale"]["calibrationfactorsetting"];
 

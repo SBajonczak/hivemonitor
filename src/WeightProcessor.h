@@ -5,12 +5,13 @@
 #define WeightProcessor_h
 
 #include "Arduino.h"
+#include <ConfigurationManager.h>
 
 class WeightProcessor
 {
 
 public:
-  WeightProcessor(int dtPin, int scPin);
+  WeightProcessor(int dtPin, int scPin, ConfigurationManager config);
   ~WeightProcessor();
   void setup(float kilogramDivider, float weightOffset, float calibrationTemperature, float calibrationFactor);
   float getWeight();
@@ -36,22 +37,22 @@ Adjust the parameter in step 4 until you get an accurate reading.
   float GetUnits();
 
   // Get an Singelton instance
-  static WeightProcessor *getInstance(int dtPin, int scPin)
-  {
-    if (instance == nullptr)
-    {
-      Serial.println("Generate new instance");
-      instance = new WeightProcessor(GPIO_HX711_DT, GPIO_HX711_SCK);
-    }
-    else
-    {
-      Serial.println("Reuse instance");
-    }
-    return instance;
-  }
+  // static WeightProcessor *getInstance(int dtPin, int scPin)
+  // {
+  //   if (instance == nullptr)
+  //   {
+  //     Serial.println("Generate new instance");
+  //     instance = new WeightProcessor(GPIO_HX711_DT, GPIO_HX711_SCK);
+  //   }
+  //   else
+  //   {
+  //     Serial.println("Reuse instance");
+  //   }
+  //   return instance;
+  // }
 
 private:
-  static WeightProcessor *instance;
+  // static WeightProcessor *instance;
 
   int _dtPin;
   int _scPin;
@@ -59,6 +60,7 @@ private:
   float _weightOffset;
   float _calibrationTemperature;
   float _calibrationFactor;
+  ConfigurationManager _config;
 };
 
 #endif

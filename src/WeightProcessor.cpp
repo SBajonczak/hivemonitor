@@ -6,7 +6,7 @@
 #include "HX711.h"
 #include <RunningMedian.h>
 // Avoiding compile issues
-WeightProcessor *WeightProcessor::instance = nullptr;
+// WeightProcessor *WeightProcessor::instance = nullptr;
 
 int _dtPin;
 int _scPin;
@@ -17,8 +17,16 @@ float _calibrationFactor;
 
 HX711 scale;
 
-WeightProcessor::WeightProcessor(int dtPin, int scPin)
+WeightProcessor::WeightProcessor(int dtPin, int scPin,ConfigurationManager config)
 {
+  this->_config= config;
+  this->_config.ReadSettings();
+
+  this->_calibrationFactor = this->_config.GetCalibrationFactorSetting();
+  this->_calibrationTemperature = this->_config.GetCalibrationTemperatureSetting();
+  this->_kilogramDivider = this->_config.GetKilogramDivider();
+  this->_weightOffset = this->_config.GetWeightOffset();
+  
   this->_dtPin = dtPin;
   this->_scPin = scPin;
   scale.begin(_dtPin, _scPin);
@@ -51,13 +59,17 @@ float WeightProcessor::getWeight()
 {
 
   RunningMedian WeightSamples = RunningMedian(3);
+  Serial.print("Kilogram Divider");
+  Serial.println(this->_kilogramDivider);
   scale.set_scale(this->_kilogramDivider); //initialize scale
+  Serial.print("Weight offset");
+  Serial.println(this->_weightOffset);
   scale.set_offset(this->_weightOffset);   //initialize scale
   for (int i = 0; i < 3; i++)
   {
 
     scale.power_up();
-    float WeightRaw = scale.read_average(3);
+    float WeightRaw = scale.get_units(3);
     scale.power_down();
     Serial.print("Weight RAW Value:");
     Serial.println(WeightRaw);
