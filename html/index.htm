@@ -35,8 +35,8 @@
 				</div>
 
 				<div id="welcome" class="grid bg-white rounded-lg shadow-sm p-1 mt-1">
-					<p class="font-bold">Thank you ❤ for installing the Hivemonitor Software. 👍</p>
-					<p>You have enabled the Settings Mode. In this Webinterface you will be able to set your configs.
+					<p class="font-bold">Thank you for installing the Hivemonitor Software. ❤</p>
+					<p>You have enabled the Settings Mode (Either manually or this is your first start). In this Webinterface you will be able to set your primary configuration.
 					</p>
 					<p>For suggestions and Bugs please go to my <a
 							href="https://github.com/SBajonczak/hivemonitor">Github project</a></p>
@@ -109,12 +109,12 @@
 					<div>
 						<span class="font-bold text-md m-1">SSID</span>
 						</p>
-						<span class="m-1">The SSID for connecting.</span>
+						<span class="m-1">Your WIFI Network SSID Name.</span>
 					</div>
 					<input class="p-1 font-bold m-1 border rounded-lg" id="wireles_ssid">
 					<div>
 						<span class="font-bold text-md m-1">Password</span></p>
-						<span class="m-1">The Password to login onto the wifi network.</span>
+						<span class="m-1">The required Password to login into your network.</span>
 					</div>
 					<input class="p-1 font-bold m-1 border rounded-lg" id="wireles_password">
 					<span
@@ -140,8 +140,7 @@
 					</div>
 					<input class="p-1 font-bold m-1 border rounded-lg" id="scale_calibrationfactorsetting">
 
-					<span class="font-bold text-md m-1 col-span-2" style="display: none;" id="scaleNotConnected">There
-						is no device connected!</span>
+					<span class="font-bold text-md m-1 col-span-2" style="display: none;" id="scaleNotConnected">There is no device connected! Please conntect the scale to the device.</span>
 					<button id="btnStartTare"
 						class="col-span-2 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
 						onclick="toogleAutoTare()">
@@ -149,7 +148,7 @@
 					</button>
 
 					<span
-						class="bg-yellow-300 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">MQTT</span>
+						class="bg-yellow-300 border mt-2 p-3 border-yellow-700 rounded-lg shadow-lg font-bold md:text-xl col-span-2">MQTT- Settings</span>
 					<div>
 						<span class="font-bold text-md m-1">Server</span></p>
 						<span class="m-1">Servername or IP</span>
