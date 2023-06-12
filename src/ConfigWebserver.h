@@ -12,8 +12,12 @@ public:
   ConfigWebserver();
   ~ConfigWebserver();
   void Serve();
+  bool IsServing();
+  void Loop();
 
-
+private: 
+  int _isServing;
+  
 };
 
 #endif

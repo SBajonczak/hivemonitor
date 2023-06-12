@@ -13,8 +13,9 @@
 
 #define AP_SSIDNAME "HiveMonitor"
 #define AP_PASSWORD "B33$"
-
+DNSServer dnsServer;
 AsyncWebServer server(80);
+
 AsyncCallbackJsonWebHandler *storeConfigHandler = new AsyncCallbackJsonWebHandler("/store", [](AsyncWebServerRequest *request, JsonVariant &json)
                                                                                   {
                                                                                     Serial.print("Got Setting:");
@@ -25,20 +26,39 @@ AsyncCallbackJsonWebHandler *storeConfigHandler = new AsyncCallbackJsonWebHandle
                                                                                     ConfigurationManager::getInstance()->ApplyJsonInput(values);
                                                                                     ConfigurationManager::getInstance()->StoreSettings();
                                                                                     ConfigurationManager::getInstance()->ReadSettings();
-                                                                                    request->send(200);
-                                                                                  });
+                                                                                    request->send(200); });
 
-ConfigWebserver::ConfigWebserver() {}
+ConfigWebserver::ConfigWebserver()
+{
+  this->_isServing = false;
+}
 ConfigWebserver::~ConfigWebserver() {}
+
+bool ConfigWebserver::IsServing()
+{
+  return this->_isServing;
+}
+
+
+void ConfigWebserver::Loop()
+{
+     Serial.printf("Is serving %i" , this->IsServing());
+
+  if (this->IsServing()){
+     Serial.print("process next request");
+     dnsServer.processNextRequest();
+  }
+}
 
 void ConfigWebserver::Serve()
 {
-  const IPAddress apIP = IPAddress(192, 168, 4, 1);
+  const IPAddress apIP = IPAddress(1, 2, 3, 4);
   static const byte DNS_PORT = 53;
-  DNSServer dnsServer;
+  
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(AP_SSIDNAME, AP_PASSWORD);
+  WiFi.softAP(AP_SSIDNAME);
+ 
   dnsServer.start(DNS_PORT, "*", apIP);
 
   Serial.print("IP Address: ");
@@ -55,17 +75,21 @@ void ConfigWebserver::Serve()
               float offset = scaledevice->getRawWeight();
               Serial.println("Offset");
               Serial.println(offset);
-              request->send(200, "text", String(offset));
-            });
-
+              request->send(200, "text", String(offset)); });
+server.onNotFound([](AsyncWebServerRequest *request)
+            {
+              AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
+              response->addHeader(F("Cache-Control"), "no-store,max-age=0");
+              // Gzip content
+              response->addHeader(F("Content-Encoding"), "gzip");
+              request->send(response); });
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
               AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
               response->addHeader(F("Cache-Control"), "no-store,max-age=0");
               // Gzip content
               response->addHeader(F("Content-Encoding"), "gzip");
-              request->send(response);
-            });
+              request->send(response); });
 
   server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -74,8 +98,7 @@ void ConfigWebserver::Serve()
               String settings = scaledevice->GetJson();
               Serial.println("Settings: ");
               Serial.println(settings);
-              request->send(200, "application/json", settings);
-            });
+              request->send(200, "application/json", settings); });
 
   server.on("/info", HTTP_GET, [](AsyncWebServerRequest *request)
             {
@@ -84,8 +107,8 @@ void ConfigWebserver::Serve()
               doc["sensors"]["scale"]["connected"]= weightProcessor->DeviceReady();
               String bodyString;
               serializeJson(doc, bodyString);
-              request->send(200, "application/json", bodyString);
-            });
+              request->send(200, "application/json", bodyString); });
 
+  this->_isServing = true;
   server.begin();
 }

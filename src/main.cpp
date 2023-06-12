@@ -9,7 +9,6 @@
 #include "ConfigWebserver.h"
 #include "MqttWrapper.h"
 
-
 // Set the Mode for the BAttery measuring
 ADC_MODE(ADC_VCC);
 
@@ -49,7 +48,7 @@ void max_run()
   {
     // Serial.println()  << "DEBUG: Max. runtime of " << RUNTIME_MAX << "s reached, shutting down!" << endl;
     devicemanager.SetSleepTime(ConfigurationManager::getInstance()->GetSleepTime());
-    //Serial.println()  << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
+    // Serial.println()  << "✔ Preparing for " << devicemanager.GetSleepTime() << " seconds sleep" << endl;
     devicemanager.GotToSleep();
     // Homie.prepareToSleep();
   }
@@ -75,6 +74,7 @@ void setup()
   case OperatingStates::Maintenance:
     Serial.println("Maintenance / Configuration mode");
     configServer.Serve();
+
     return;
     break;
   case OperatingStates::Operating:
@@ -171,6 +171,10 @@ void setup()
 
 void loop()
 {
+  if (configServer.IsServing())
+  {
+    configServer.Loop();
+  }
   if (!devicemanager.GetOperatingState() == OperatingStates::Maintenance)
   {
   }
